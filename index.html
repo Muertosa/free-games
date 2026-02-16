@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бесплатные Игры — Раздачи игр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding:30px 16px 60px;color:#e2e8f0}
+.container{max-width:1320px;margin:0 auto}
+
+.header{text-align:center;margin-bottom:36px}
+.title{font-family:'Unbounded',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:900;background:linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.subtitle{font-size:15px;color:#94a3b8;margin-bottom:14px}
+.meta-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}
+.update-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:rgba(255,255,255,0.06);border-radius:50px;color:#94a3b8;font-size:13px;border:1px solid rgba(255,255,255,0.08)}
+.live-badge{padding:4px 12px;border-radius:8px;background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.2);font-size:12px;font-weight:700}
+.cache-badge{padding:4px 12px;border-radius:8px;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);font-size:12px;font-weight:700}
+.fallback-badge{padding:4px 12px;border-radius:8px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.2);font-size:12px;font-weight:700}
+
+.controls{background:rgba(255,255,255,0.04);padding:20px;border-radius:16px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.06)}
+.search-box{width:100%;padding:13px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:15px;background:rgba(255,255,255,0.05);color:#e2e8f0;font-family:inherit;margin-bottom:14px;outline:none}
+.search-box:focus{border-color:rgba(139,92,246,0.5)}
+.search-box::placeholder{color:#64748b}
+.filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.fbtn{padding:7px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#94a3b8;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;transition:all 0.2s}
+.fbtn.on{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff}
+.fbtn:hover:not(.on){background:rgba(255,255,255,0.08)}
+.sort-row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.sort-btn{padding:5px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:6px;color:#64748b;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit;transition:all 0.2s}
+.sort-btn.on{color:#a78bfa;border-color:rgba(167,139,250,0.4)}
+
+.tabs{display:flex;gap:8px;margin-bottom:28px;justify-content:center;flex-wrap:wrap}
+.tab{padding:10px 22px;font-weight:800;font-size:14px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.tab.on{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff}
+
+.tiny-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:-10px 0 18px}
+.chk{display:inline-flex;gap:8px;align-items:center;color:#94a3b8;font-size:13px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;cursor:pointer}
+.chk input{accent-color:#8b5cf6}
+
+.stats{display:flex;justify-content:center;gap:12px;margin-bottom:32px;flex-wrap:wrap}
+.stat-card{background:rgba(255,255,255,0.04);padding:16px 22px;border-radius:14px;text-align:center;border:1px solid rgba(255,255,255,0.06);min-width:90px}
+.stat-card.value-card{border-color:rgba(34,197,94,0.12);background:rgba(34,197,94,0.04)}
+.stat-number{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:900}
+.stat-number.green{color:#4ade80}
+.stat-label{font-size:11px;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700}
+.stat-label.green{color:#16a34a}
+
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:40px}
+.gc{background:#181b2e;border-radius:16px;overflow:hidden;transition:transform 0.25s,box-shadow 0.25s;border:1px solid rgba(255,255,255,0.06);position:relative;animation:fadeUp 0.5s ease-out backwards}
+.gc:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(99,102,241,0.15)}
+
+.take-btn{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:900;font-size:16px;transition:all 0.2s}
+.take-btn:hover{transform:scale(1.12)}
+.take-btn.on{background:rgba(34,197,94,0.22);border-color:rgba(34,197,94,0.35);color:#4ade80}
+
+.gi{width:100%;height:180px;object-fit:cover;display:block;background:linear-gradient(135deg,#1e1b4b,#312e81)}
+.gi-ph{width:100%;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:rgba(255,255,255,0.6);text-align:center;padding:16px;gap:8px}
+.gi-ph::before{content:'🎮';font-size:36px;opacity:0.5}
+
+.gc-body{padding:20px}
+.gc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:12px}
+.gc-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;color:#f1f5f9;line-height:1.3;flex:1}
+.gc-badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+
+.badge{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:800;text-transform:uppercase;white-space:nowrap}
+.b-epic{background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.25)}
+.b-steam{background:rgba(99,102,241,0.12);color:#a5b4fc;border:1px solid rgba(99,102,241,0.2)}
+.b-gog{background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.2)}
+.b-itchio{background:rgba(245,101,101,0.12);color:#fca5a5;border:1px solid rgba(245,101,101,0.2)}
+.b-other{background:rgba(148,163,184,0.12);color:#94a3b8;border:1px solid rgba(148,163,184,0.2)}
+.b-hot{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.25)}
+.b-val{background:rgba(34,197,94,0.10);color:#4ade80;border:1px solid rgba(34,197,94,0.18);font-size:9px}
+.b-taken{background:rgba(34,197,94,0.16);color:#4ade80;border:1px solid rgba(34,197,94,0.26)}
+
+.gc-desc{color:#64748b;font-size:13px;line-height:1.5;margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cd{background:rgba(239,68,68,0.08);padding:8px 12px;border-radius:8px;margin-bottom:14px;text-align:center;border:1px solid rgba(239,68,68,0.12)}
+.cd-t{font-size:11px;color:#f87171;font-weight:700}
+.cd-v{font-size:15px;font-weight:900;color:#f87171;margin-top:3px;font-family:'Unbounded',sans-serif}
+
+.gc-foot{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);gap:12px}
+.p-free{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:900;background:linear-gradient(135deg,#4ade80,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gc-link{padding:9px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;border-radius:10px;font-weight:800;font-size:13px;transition:all 0.2s;white-space:nowrap}
+.gc-link:hover{transform:scale(1.04);box-shadow:0 8px 24px rgba(99,102,241,0.35)}
+
+.empty{text-align:center;padding:40px 20px;color:#64748b;font-size:15px}
+.src{text-align:center;padding:20px;color:#475569;font-size:12px}
+.src a{color:#6366f1;text-decoration:none}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:640px){body{padding:20px 10px 40px}.games-grid{grid-template-columns:1fr;gap:16px}}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1 class="title">Бесплатные Игры</h1>
+    <p class="subtitle">Раздачи ранее платных игр — забери и оставь навсегда</p>
+    <div class="meta-row">
+      <span class="update-badge">Обновлено: <span id="fg-ut"></span></span>
+      <span class="live-badge" id="fg-live" style="display:none">✅ LIVE</span>
+      <span class="cache-badge" id="fg-cache" style="display:none">📦 из кэша</span>
+      <span class="fallback-badge" id="fg-fallback" style="display:none">💾 офлайн-данные</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <input type="text" class="search-box" id="fg-sb" placeholder="🔍 Поиск по названию..." />
+    <div class="filters" id="fg-fb"></div>
+    <div class="sort-row">
+      <button class="sort-btn on" data-sort="date">Новые</button>
+      <button class="sort-btn" data-sort="value">По ценности</button>
+      <button class="sort-btn" data-sort="az">А-Я</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-t="all">Активные</button>
+    <button class="tab" data-t="taken">Забрано (<span id="fg-tc">0</span>)</button>
+  </div>
+
+  <div class="tiny-row">
+    <label class="chk">
+      <input type="checkbox" id="fg-hideTaken">
+      Скрывать забранные в «Активные»
+    </label>
+  </div>
+
+  <div class="stats" id="fg-st"></div>
+  <div id="fg-ct"></div>
+
+  <div class="src">
+    Данные: <a href="https://www.gamerpower.com" target="_blank" rel="noopener">GamerPower</a> ·
+    <a href="https://store.epicgames.com/ru/free-games" target="_blank" rel="noopener">Epic Games</a> ·
+    <a href="https://www.gog.com" target="_blank" rel="noopener">GOG</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var FALLBACK = [
+    {
+      id:'fb-nwtd',
+      title:'Nobody Wants to Die',
+      desc:'Нуарный детектив в Нью-Йорке 2329 года. Расследуй убийства в обществе, где смерть побеждена. Атмосфера Blade Runner, механики LA Noire.',
+      img:'https://www.gamerpower.com/offers/1/67a7e9e5e0338.jpg',
+      url:'https://store.epicgames.com/ru/p/nobody-wants-to-die-a09dd1',
+      end:'2026-02-20T16:00:00.000Z',
+      store:'epic',worth:29.99,hot:true
+    },
+    {
+      id:'fb-dd2',
+      title:'The Darkside Detective: A Fumble in the Dark',
+      desc:'Пиксельный point-and-click детектив. Расследуй паранормальные случаи в городе Твин Лэйкс. Юмор и атмосфера.',
+      img:'https://www.gamerpower.com/offers/1/67a7ea3a7b80b.jpg',
+      url:'https://store.epicgames.com/ru/p/the-darkside-detective-a-fumble-in-the-dark-4967f3',
+      end:'2026-02-20T16:00:00.000Z',
+      store:'epic',worth:17.99,hot:true
+    },
+    {
+      id:'fb-aitd',
+      title:'Alone in the Dark: The Trilogy 1+2+3',
+      desc:'Классическая трилогия survival-хорроров 1992-1995. Три культовые игры, заложившие основы жанра.',
+      img:'https://www.gamerpower.com/offers/1/679a1a6acbf56.jpg',
+      url:'https://www.gog.com/en/game/alone_in_the_dark_the_trilogy_123',
+      end:null,
+      store:'gog',worth:5.99,hot:false
+    },
+    {
+      id:'fb-loa',
+      title:'Legacy of Arcane',
+      desc:'Фэнтезийная RPG с пошаговыми боями. Исследуй древние руины и сражайся с монстрами.',
+      img:'https://www.gamerpower.com/offers/1/679649c89d09c.jpg',
+      url:'https://store.steampowered.com/app/2747630/Legacy_of_Arcane/',
+      end:null,
+      store:'steam',worth:9.99,hot:false
+    },
+    {
+      id:'fb-encased',
+      title:'Encased: A Sci-Fi Post-Apocalyptic RPG',
+      desc:'Изометрическая sci-fi RPG в духе Fallout. Исследуй таинственный Купол, принимай сложные решения.',
+      img:'https://www.gamerpower.com/offers/1/6784e75946a76.jpg',
+      url:'https://store.steampowered.com/app/921800/Encased_A_SciFi_PostApocalyptic_RPG/',
+      end:null,
+      store:'steam',worth:29.99,hot:true
+    },
+    {
+      id:'fb-sunblockers',
+      title:'SunBlockers',
+      desc:'Весёлая инди-стратегия. Управляй крошечными существами и защищайся от палящего солнца.',
+      img:'https://www.gamerpower.com/offers/1/67ab2e8618b1f.jpg',
+      url:'https://store.epicgames.com/en-US/p/sunblockers-83e34a',
+      end:'2026-02-27T16:00:00.000Z',
+      store:'epic',worth:4.99,hot:false
+    },
+    {
+      id:'fb-returnash',
+      title:'Return to Ash',
+      desc:'Атмосферная визуальная новелла о путешествии через загробный мир. Красивая рисованная графика.',
+      img:'https://www.gamerpower.com/offers/1/67ab2ef2ab1bc.jpg',
+      url:'https://store.epicgames.com/en-US/p/return-to-ash-dee3ff',
+      end:'2026-02-27T16:00:00.000Z',
+      store:'epic',worth:5.99,hot:false
+    },
+    {
+      id:'fb-nightreaper',
+      title:'NightReaper',
+      desc:'Dark fantasy ретро-шутер. Стань Жнецом Ночи, собирай души и уничтожай орды проклятых врагов.',
+      img:'https://www.gamerpower.com/offers/1/67ab2f2db8832.jpg',
+      url:'https://store.epicgames.com/ru/free-games',
+      end:'2026-02-27T16:00:00.000Z',
+      store:'epic',worth:3.99,hot:false
+    },
+    {
+      id:'fb-gog-mystery',
+      title:'Mystery GOG Giveaway',
+      desc:'Бесплатная раздача на GOG.com — зайди на сайт и проверь, что раздают прямо сейчас!',
+      img:'https://www.gamerpower.com/offers/1/6703e7f7e573c.jpg',
+      url:'https://www.gog.com/#giveaway',
+      end:null,
+      store:'gog',worth:0,hot:false
+    },
+    {
+      id:'fb-indie1',
+      title:'Aerial_Knight\'s Never Yield',
+      desc:'Стильный 3D раннер с крутым саундтреком. Убегай, уклоняйся, прыгай через препятствия в футуристичном Детройте.',
+      img:'https://www.gamerpower.com/offers/1/6602c64a8b1e8.jpg',
+      url:'https://store.epicgames.com/ru/free-games',
+      end:null,
+      store:'epic',worth:11.99,hot:false
+    }
+  ];
+
+  var games = [];
+  var tab = 'all';
+  var filt = 'all';
+  var sort = 'date';
+  var taken = [];
+  try { taken = JSON.parse(localStorage.getItem('fgtaken') || '[]'); } catch(e) { taken = []; }
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { var d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
+
+  function fetchWithTimeout(url, ms) {
+    return new Promise(function(ok, no) {
+      var c = new AbortController();
+      var t = setTimeout(function() { c.abort(); }, ms || 10000);
+      fetch(url, { signal: c.signal })
+        .then(function(r) { clearTimeout(t); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(ok)
+        .catch(function(e) { clearTimeout(t); no(e); });
+    });
+  }
+
+  function smartFetch(url, ms) {
+    return fetchWithTimeout(url, ms || 10000).catch(function() {
+      return fetchWithTimeout('https://api.allorigins.win/raw?url=' + encodeURIComponent(url), 12000);
+    }).catch(function() {
+      return fetchWithTimeout('https://corsproxy.io/?' + encodeURIComponent(url), 12000);
+    });
+  }
+
+  var CK = 'fgcache6';
+  var CTL = 30 * 60 * 1000;
+
+  function cacheGet() {
+    try {
+      var r = JSON.parse(localStorage.getItem(CK));
+      if (r && Date.now() - r.ts < CTL) return r.data;
+      return null;
+    } catch(e) { return null; }
+  }
+
+  function cacheSet(d) {
+    try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), data: d })); } catch(e) {}
+  }
+
+  function norm(g) {
+    return {
+      id: g.id || '',
+      title: g.title || '',
+      desc: g.desc || '',
+      img: g.img || '',
+      url: g.url || '#',
+      end: g.end || null,
+      store: g.store || 'other',
+      worth: g.worth || 0,
+      hot: !!g.hot,
+      ts: g.ts || Date.now()
+    };
+  }
+
+  function mapStore(p) {
+    p = (p || '').toLowerCase();
+    if (p.indexOf('epic') >= 0) return 'epic';
+    if (p.indexOf('steam') >= 0) return 'steam';
+    if (p.indexOf('gog') >= 0) return 'gog';
+    if (p.indexOf('itch') >= 0) return 'itchio';
+    return 'other';
+  }
+
+  function fetchGP() {
+    return smartFetch('https://www.gamerpower.com/api/giveaways?type=game&sort-by=value', 10000).then(function(d) {
+      if (!Array.isArray(d)) return [];
+      return d.filter(function(g) {
+        var p = (g.platforms || '').toLowerCase();
+        return p.indexOf('pc') >= 0 || p.indexOf('steam') >= 0 || p.indexOf('epic') >= 0 || p.indexOf('gog') >= 0 || p.indexOf('itch') >= 0 || p.indexOf('drm') >= 0;
+      }).map(function(g) {
+        var w = 0;
+        try { w = parseFloat(String(g.worth || '0').replace(/[^0-9.]/g, '')) || 0; } catch(e) {}
+        return norm({
+          id: 'gp-' + g.id,
+          title: g.title,
+          desc: g.description || g.short_description || '',
+          img: g.thumbnail || g.image || '',
+          url: g.open_giveaway_url || g.gamerpower_url || '#',
+          end: (g.end_date && g.end_date !== 'N/A') ? g.end_date : null,
+          store: mapStore(g.platforms),
+          worth: w,
+          hot: w > 15,
+          ts: Date.now()
+        });
+      }).filter(function(g) { return g.title; });
+    });
+  }
+
+  function fetchEpic() {
+    return smartFetch('https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US', 10000).then(function(data) {
+      var el = (data && data.data && data.data.Catalog && data.data.Catalog.searchStore && data.data.Catalog.searchStore.elements) || [];
+      var out = [];
+      for (var i = 0; i < el.length; i++) {
+        var g = el[i];
+        if (!g.promotions) continue;
+        var off = g.promotions.promotionalOffers || [];
+        if (!off.length || !off[0].promotionalOffers || !off[0].promotionalOffers.length) continue;
+        var o = off[0].promotionalOffers[0];
+        var img = '';
+        var ki = g.keyImages || [];
+        var preferred = ['DieselStoreFrontWide', 'OfferImageWide', 'DieselStoreFrontTall', 'OfferImageTall', 'Thumbnail', 'DieselGameBoxWide'];
+        for (var p = 0; p < preferred.length; p++) {
+          for (var j = 0; j < ki.length; j++) {
+            if (ki[j].type === preferred[p]) { img = ki[j].url; break; }
+          }
+          if (img) break;
+        }
+        if (!img && ki.length) img = ki[0].url;
+        var sl = g.productSlug || g.urlSlug || (g.offerMappings && g.offerMappings[0] && g.offerMappings[0].pageSlug) || '';
+        var w = 0;
+        try { var pr = g.price && g.price.totalPrice; if (pr && pr.originalPrice) w = pr.originalPrice / 100; } catch(e) {}
+        out.push(norm({
+          id: 'ep-' + g.id,
+          title: g.title || '',
+          desc: g.description || 'Бесплатно в Epic Games Store',
+          img: img,
+          url: sl ? 'https://store.epicgames.com/ru/p/' + sl : 'https://store.epicgames.com/ru/free-games',
+          end: o.endDate,
+          store: 'epic',
+          worth: w,
+          hot: true,
+          ts: Date.now()
+        }));
+      }
+      return out;
+    });
+  }
+
+  function mergeGames() {
+    var args = [].slice.call(arguments);
+    var seen = {};
+    var out = [];
+    args.forEach(function(arr) {
+      if (!Array.isArray(arr)) return;
+      arr.forEach(function(g) {
+        var key = g.title.toLowerCase().replace(/[^a-zа-яё0-9]/g, '');
+        if (!seen[key]) { seen[key] = true; out.push(g); }
+      });
+    });
+    return out;
+  }
+
+  function saveTaken() { try { localStorage.setItem('fgtaken', JSON.stringify(taken)); } catch(e) {} }
+  function isTaken(id) { return taken.indexOf(id) >= 0; }
+
+  function toggleTaken(id) {
+    var i = taken.indexOf(id);
+    if (i > -1) taken.splice(i, 1); else taken.push(id);
+    saveTaken();
+    $('fg-tc').textContent = taken.length;
+    render();
+  }
+  window._fgToggleTaken = toggleTaken;
+
+  function countdown(end) {
+    if (!end) return null;
+    try {
+      var d = new Date(end).getTime() - Date.now();
+      if (d < 0) return null;
+      return Math.floor(d / 864e5) + 'д ' + Math.floor((d % 864e5) / 36e5) + 'ч ' + Math.floor((d % 36e5) / 6e4) + 'м';
+    } catch(e) { return null; }
+  }
+
+  function sortGames(arr) {
+    var c = arr.slice();
+    if (sort === 'value') c.sort(function(a, b) { return (b.worth || 0) - (a.worth || 0); });
+    else if (sort === 'az') c.sort(function(a, b) { return a.title.localeCompare(b.title); });
+    return c;
+  }
+
+  function imgError(el) {
+    el.style.display = 'none';
+    var ph = el.nextElementSibling;
+    if (ph) ph.style.display = 'flex';
+  }
+  window._fgImgError = imgError;
+
+  function cardHTML(g, i) {
+    var tkn = isTaken(g.id);
+    var cd = countdown(g.end);
+    var gr = 'linear-gradient(135deg,#1e1b4b,#312e81)';
+    if (g.store === 'epic') gr = 'linear-gradient(135deg,#1a1a2e,#16213e)';
+    if (g.store === 'gog') gr = 'linear-gradient(135deg,#1a0a2e,#2d1b69)';
+    if (g.store === 'steam') gr = 'linear-gradient(135deg,#1b2838,#2a475e)';
+    if (g.store === 'itchio') gr = 'linear-gradient(135deg,#2e1a1a,#691b1b)';
+    var imgH = '';
+    if (g.img) {
+      imgH =
+        '<img src="' + esc(g.img) + '" class="gi" alt="' + esc(g.title) + '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="_fgImgError(this)">' +
+        '<div class="gi-ph" style="display:none;background:' + gr + '">' + esc(g.title) + '</div>';
+    } else {
+      imgH = '<div class="gi-ph" style="background:' + gr + '">' + esc(g.title) + '</div>';
+    }
+    var badges = '<span class="badge b-' + (g.store || 'other') + '">' + (g.store || 'other').toUpperCase() + '</span>';
+    if (g.worth > 0) badges += '<span class="badge b-val">$' + (g.worth || 0).toFixed(0) + ' value</span>';
+    if (g.hot) badges += '<span class="badge b-hot">🔥 HOT</span>';
+    if (tkn) badges += '<span class="badge b-taken">✓ ЗАБРАНО</span>';
+    return '' +
+    '<div class="gc" style="animation-delay:' + (i * 0.04) + 's">' +
+      '<button class="take-btn ' + (tkn ? 'on' : '') + '" title="' + (tkn ? 'Убрать из забранных' : 'Пометить как забранное') + '" onclick="_fgToggleTaken(\'' + g.id + '\')">' + (tkn ? '✓' : '＋') + '</button>' +
+      imgH +
+      '<div class="gc-body">' +
+        '<div class="gc-head">' +
+          '<h3 class="gc-title">' + esc(g.title) + '</h3>' +
+          '<div class="gc-badges">' + badges + '</div>' +
+        '</div>' +
+        '<p class="gc-desc">' + esc(g.desc) + '</p>' +
+        (cd ? '<div class="cd"><div class="cd-t">⏰ Осталось:</div><div class="cd-v">' + cd + '</div></div>' : '') +
+        '<div class="gc-foot">' +
+          '<div class="p-free">Бесплатно</div>' +
+          '<a href="' + esc(g.url) + '" target="_blank" rel="noopener" class="gc-link">Забрать →</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function render() {
+    var el = $('fg-ct');
+    var q = ($('fg-sb').value || '').toLowerCase();
+    var now = Date.now();
+    var active = games.filter(function(g) { return !g.end || new Date(g.end).getTime() > now; });
+    var list;
+    if (tab === 'taken') {
+      list = active.filter(function(g) { return isTaken(g.id); });
+    } else {
+      list = active.slice();
+      if ($('fg-hideTaken').checked) {
+        list = list.filter(function(g) { return !isTaken(g.id); });
+      }
+    }
+    if (q) list = list.filter(function(g) { return g.title.toLowerCase().indexOf(q) >= 0; });
+    if (filt !== 'all') list = list.filter(function(g) { return g.store === filt; });
+    list = sortGames(list);
+    var stores = [];
+    active.forEach(function(g) { if (stores.indexOf(g.store) < 0) stores.push(g.store); });
+    var fh = '<button class="fbtn ' + (filt === 'all' ? 'on' : '') + '" data-filt="all">Все</button>';
+    stores.forEach(function(s) {
+      fh += '<button class="fbtn ' + (filt === s ? 'on' : '') + '" data-filt="' + s + '">' + s.toUpperCase() + '</button>';
+    });
+    $('fg-fb').innerHTML = fh;
+    document.querySelectorAll('.sort-btn').forEach(function(b) {
+      b.classList.toggle('on', b.getAttribute('data-sort') === sort);
+    });
+    var sc = {};
+    var totalValue = 0;
+    list.forEach(function(g) {
+      sc[g.store] = (sc[g.store] || 0) + 1;
+      totalValue += (g.worth || 0);
+    });
+    var sh = '';
+    Object.keys(sc).forEach(function(k) {
+      sh += '<div class="stat-card"><div class="stat-number">' + sc[k] + '</div><div class="stat-label">' + k.toUpperCase() + '</div></div>';
+    });
+    sh += '<div class="stat-card"><div class="stat-number">' + list.length + '</div><div class="stat-label">Всего</div></div>';
+    if (totalValue > 0) {
+      sh += '<div class="stat-card value-card"><div class="stat-number green">$' + totalValue.toFixed(0) + '</div><div class="stat-label green">Ценность</div></div>';
+    }
+    $('fg-st').innerHTML = sh;
+    if (list.length) {
+      el.innerHTML = '<div class="games-grid">' + list.map(cardHTML).join('') + '</div>';
+    } else {
+      el.innerHTML = '<div class="empty">' + (tab === 'taken' ? '📋 Пока ничего не отмечено как «Забрано»' : '🔍 Ничего не найдено') + '</div>';
+    }
+  }
+
+  function showBadge(src) {
+    $('fg-live').style.display = (src === 'live') ? 'inline-block' : 'none';
+    $('fg-cache').style.display = (src === 'cache') ? 'inline-block' : 'none';
+    $('fg-fallback').style.display = (src === 'fallback') ? 'inline-block' : 'none';
+  }
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.fbtn[data-filt]');
+    if (btn) { filt = btn.getAttribute('data-filt'); render(); return; }
+    var sortBtn = e.target.closest('.sort-btn[data-sort]');
+    if (sortBtn) { sort = sortBtn.getAttribute('data-sort'); render(); return; }
+    var tabBtn = e.target.closest('.tab[data-t]');
+    if (tabBtn) {
+      tab = tabBtn.getAttribute('data-t');
+      filt = 'all';
+      document.querySelectorAll('.tab').forEach(function(b) {
+        b.classList.toggle('on', b.getAttribute('data-t') === tab);
+      });
+      render();
+      return;
+    }
+  });
+
+  $('fg-sb').addEventListener('input', function() { render(); });
+  $('fg-hideTaken').addEventListener('change', function() { render(); });
+
+  $('fg-ut').textContent = new Date().toLocaleString('ru-RU');
+  $('fg-tc').textContent = taken.length;
+
+  games = FALLBACK.map(norm);
+  showBadge('fallback');
+  render();
+
+  var cached = cacheGet();
+  if (cached && cached.length > 0) {
+    games = cached.map(norm);
+    showBadge('cache');
+    render();
+  }
+
+  var pGP = fetchGP().catch(function() { return []; });
+  var pEpic = fetchEpic().catch(function() { return []; });
+
+  Promise.all([pGP, pEpic]).then(function(res) {
+    var gp = res[0] || [];
+    var epic = res[1] || [];
+    var fb = FALLBACK.map(norm);
+    if (gp.length > 0 || epic.length > 0) {
+      games = mergeGames(gp, epic, fb);
+      showBadge('live');
+      cacheSet(games);
+    }
+    $('fg-ut').textContent = new Date().toLocaleString('ru-RU');
+    render();
+  });
+
+  setInterval(render, 60000);
+})();
+</script>
+
+</body>
+</html>
