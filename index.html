@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding:30px 16px 60px;color:#e2e8f0}
+body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding:30px 16px 60px;color:#e2e8f0;transition:background 0.3s,color 0.3s}
 .container{max-width:1320px;margin:0 auto}
 
 .header{text-align:center;margin-bottom:36px}
@@ -22,7 +22,7 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
 .fallback-badge{padding:4px 12px;border-radius:8px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.2);font-size:12px;font-weight:700}
 
 .controls{background:rgba(255,255,255,0.04);padding:20px;border-radius:16px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.06)}
-.search-box{width:100%;padding:13px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:15px;background:rgba(255,255,255,0.05);color:#e2e8f0;font-family:inherit;margin-bottom:14px;outline:none}
+.search-box{width:100%;padding:13px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:15px;background:rgba(255,255,255,0.05);color:#e2e8f0;font-family:inherit;margin-bottom:14px;outline:none;transition:border-color 0.2s}
 .search-box:focus{border-color:rgba(139,92,246,0.5)}
 .search-box::placeholder{color:#64748b}
 .filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -44,14 +44,18 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
 .stats{display:flex;justify-content:center;gap:12px;margin-bottom:32px;flex-wrap:wrap}
 .stat-card{background:rgba(255,255,255,0.04);padding:16px 22px;border-radius:14px;text-align:center;border:1px solid rgba(255,255,255,0.06);min-width:90px}
 .stat-card.value-card{border-color:rgba(34,197,94,0.12);background:rgba(34,197,94,0.04)}
+.stat-card.savings-card{border-color:rgba(59,130,246,0.12);background:rgba(59,130,246,0.04)}
 .stat-number{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:900}
 .stat-number.green{color:#4ade80}
+.stat-number.blue{color:#60a5fa}
 .stat-label{font-size:11px;color:#64748b;margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700}
 .stat-label.green{color:#16a34a}
+.stat-label.blue{color:#3b82f6}
 
 .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:40px}
 .gc{background:#181b2e;border-radius:16px;overflow:hidden;transition:transform 0.25s,box-shadow 0.25s;border:1px solid rgba(255,255,255,0.06);position:relative;animation:fadeUp 0.5s ease-out backwards}
 .gc:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(99,102,241,0.15)}
+.gc.expired-card{opacity:0.5;filter:grayscale(0.5)}
 
 .take-btn{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:900;font-size:16px;transition:all 0.2s}
 .take-btn:hover{transform:scale(1.12)}
@@ -75,23 +79,57 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
 .b-hot{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.25)}
 .b-val{background:rgba(34,197,94,0.10);color:#4ade80;border:1px solid rgba(34,197,94,0.18);font-size:9px}
 .b-taken{background:rgba(34,197,94,0.16);color:#4ade80;border:1px solid rgba(34,197,94,0.26)}
+.b-new{background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.25);animation:pulse 2s infinite}
+.b-expired{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2)}
+.b-verified{background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.2)}
 
 .gc-desc{color:#64748b;font-size:13px;line-height:1.5;margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cd{background:rgba(239,68,68,0.08);padding:8px 12px;border-radius:8px;margin-bottom:14px;text-align:center;border:1px solid rgba(239,68,68,0.12)}
 .cd-t{font-size:11px;color:#f87171;font-weight:700}
 .cd-v{font-size:15px;font-weight:900;color:#f87171;margin-top:3px;font-family:'Unbounded',sans-serif}
+.cd-expired{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.25)}
+.cd-expired .cd-t,.cd-expired .cd-v{color:#ef4444}
 
 .gc-foot{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);gap:12px}
 .p-free{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:900;background:linear-gradient(135deg,#4ade80,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .gc-link{padding:9px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;border-radius:10px;font-weight:800;font-size:13px;transition:all 0.2s;white-space:nowrap}
 .gc-link:hover{transform:scale(1.04);box-shadow:0 8px 24px rgba(99,102,241,0.35)}
+.gc-link.disabled{opacity:0.5;pointer-events:none;background:#475569}
 
 .empty{text-align:center;padding:40px 20px;color:#64748b;font-size:15px}
 .src{text-align:center;padding:20px;color:#475569;font-size:12px}
 .src a{color:#6366f1;text-decoration:none}
 
+/* Loading skeleton */
+.skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:40px}
+.skeleton-card{background:#181b2e;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
+.skeleton-img{width:100%;height:180px;background:linear-gradient(90deg,#1e1b4b 25%,#2d2a5e 50%,#1e1b4b 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+.skeleton-body{padding:20px}
+.skeleton-line{height:14px;border-radius:7px;background:linear-gradient(90deg,rgba(255,255,255,0.05) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.05) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;margin-bottom:10px}
+.skeleton-line.w60{width:60%}
+.skeleton-line.w80{width:80%}
+.skeleton-line.w40{width:40%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Export/Import panel */
+.toolbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.tool-btn{padding:7px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#94a3b8;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
+.tool-btn:hover{background:rgba(255,255,255,0.08);color:#e2e8f0}
+.tool-btn.success{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.3);color:#4ade80}
+
+/* Toast notification */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:#1e293b;color:#e2e8f0;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;border:1px solid rgba(255,255,255,0.1);z-index:1000;transition:transform 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.toast-success{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.15)}
+.toast.toast-error{border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.15)}
+.toast.toast-info{border-color:rgba(59,130,246,0.3);background:rgba(59,130,246,0.15)}
+
+/* Not free warning */
+.not-free-warning{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:6px 10px;margin-bottom:14px;text-align:center;font-size:11px;color:#f87171;font-weight:700}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:640px){body{padding:20px 10px 40px}.games-grid{grid-template-columns:1fr;gap:16px}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+@media(max-width:640px){body{padding:20px 10px 40px}.games-grid,.skeleton-grid{grid-template-columns:1fr;gap:16px}}
 </style>
 </head>
 <body>
@@ -115,12 +153,14 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
       <button class="sort-btn on" data-sort="date">Новые</button>
       <button class="sort-btn" data-sort="value">По ценности</button>
       <button class="sort-btn" data-sort="az">А-Я</button>
+      <button class="sort-btn" data-sort="ending">Скоро кончатся</button>
     </div>
   </div>
 
   <div class="tabs">
     <button class="tab on" data-t="all">Активные</button>
     <button class="tab" data-t="taken">Забрано (<span id="fg-tc">0</span>)</button>
+    <button class="tab" data-t="expired">Истёкшие</button>
   </div>
 
   <div class="tiny-row">
@@ -128,6 +168,12 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
       <input type="checkbox" id="fg-hideTaken">
       Скрывать забранные в «Активные»
     </label>
+  </div>
+
+  <div class="toolbar">
+    <button class="tool-btn" id="fg-export" title="Экспортировать список забранных">📤 Экспорт</button>
+    <button class="tool-btn" id="fg-import" title="Импортировать список забранных">📥 Импорт</button>
+    <button class="tool-btn" id="fg-clear-taken" title="Очистить список забранных">🗑️ Очистить</button>
   </div>
 
   <div class="stats" id="fg-st"></div>
@@ -140,15 +186,24 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
   </div>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="fg-toast"></div>
+
+<!-- Hidden file input for import -->
+<input type="file" id="fg-file-input" accept=".json" style="display:none">
+
 <script>
 (function(){
   'use strict';
 
+  /* ═══════════════════════════════════════════
+     FALLBACK DATA
+     ═══════════════════════════════════════════ */
   var FALLBACK = [
     {
       id:'fb-nwtd',
       title:'Nobody Wants to Die',
-      desc:'Нуарный детектив в Нью-Йорке 2329 года. Расследуй убийства в обществе, где смерть побеждена. Атмосфера Blade Runner, механики LA Noire.',
+      desc:'Нуарный детектив в Нью-Йорке 2329 года. Расследуй убийства в обществе, где смерть побеждена.',
       img:'https://www.gamerpower.com/offers/1/67a7e9e5e0338.jpg',
       url:'https://store.epicgames.com/ru/p/nobody-wants-to-die-a09dd1',
       end:'2026-02-20T16:00:00.000Z',
@@ -157,7 +212,7 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     {
       id:'fb-dd2',
       title:'The Darkside Detective: A Fumble in the Dark',
-      desc:'Пиксельный point-and-click детектив. Расследуй паранормальные случаи в городе Твин Лэйкс. Юмор и атмосфера.',
+      desc:'Пиксельный point-and-click детектив. Расследуй паранормальные случаи в городе Твин Лэйкс.',
       img:'https://www.gamerpower.com/offers/1/67a7ea3a7b80b.jpg',
       url:'https://store.epicgames.com/ru/p/the-darkside-detective-a-fumble-in-the-dark-4967f3',
       end:'2026-02-20T16:00:00.000Z',
@@ -166,87 +221,152 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     {
       id:'fb-aitd',
       title:'Alone in the Dark: The Trilogy 1+2+3',
-      desc:'Классическая трилогия survival-хорроров 1992-1995. Три культовые игры, заложившие основы жанра.',
+      desc:'Классическая трилогия survival-хорроров 1992-1995. Три культовые игры.',
       img:'https://www.gamerpower.com/offers/1/679a1a6acbf56.jpg',
       url:'https://www.gog.com/en/game/alone_in_the_dark_the_trilogy_123',
       end:null,
       store:'gog',worth:5.99,hot:false
     },
     {
-      id:'fb-loa',
-      title:'Legacy of Arcane',
-      desc:'Фэнтезийная RPG с пошаговыми боями. Исследуй древние руины и сражайся с монстрами.',
-      img:'https://www.gamerpower.com/offers/1/679649c89d09c.jpg',
-      url:'https://store.steampowered.com/app/2747630/Legacy_of_Arcane/',
-      end:null,
-      store:'steam',worth:9.99,hot:false
-    },
-    {
       id:'fb-encased',
       title:'Encased: A Sci-Fi Post-Apocalyptic RPG',
-      desc:'Изометрическая sci-fi RPG в духе Fallout. Исследуй таинственный Купол, принимай сложные решения.',
+      desc:'Изометрическая sci-fi RPG в духе Fallout. Исследуй таинственный Купол.',
       img:'https://www.gamerpower.com/offers/1/6784e75946a76.jpg',
       url:'https://store.steampowered.com/app/921800/Encased_A_SciFi_PostApocalyptic_RPG/',
       end:null,
       store:'steam',worth:29.99,hot:true
-    },
-    {
-      id:'fb-sunblockers',
-      title:'SunBlockers',
-      desc:'Весёлая инди-стратегия. Управляй крошечными существами и защищайся от палящего солнца.',
-      img:'https://www.gamerpower.com/offers/1/67ab2e8618b1f.jpg',
-      url:'https://store.epicgames.com/en-US/p/sunblockers-83e34a',
-      end:'2026-02-27T16:00:00.000Z',
-      store:'epic',worth:4.99,hot:false
-    },
-    {
-      id:'fb-returnash',
-      title:'Return to Ash',
-      desc:'Атмосферная визуальная новелла о путешествии через загробный мир. Красивая рисованная графика.',
-      img:'https://www.gamerpower.com/offers/1/67ab2ef2ab1bc.jpg',
-      url:'https://store.epicgames.com/en-US/p/return-to-ash-dee3ff',
-      end:'2026-02-27T16:00:00.000Z',
-      store:'epic',worth:5.99,hot:false
-    },
-    {
-      id:'fb-nightreaper',
-      title:'NightReaper',
-      desc:'Dark fantasy ретро-шутер. Стань Жнецом Ночи, собирай души и уничтожай орды проклятых врагов.',
-      img:'https://www.gamerpower.com/offers/1/67ab2f2db8832.jpg',
-      url:'https://store.epicgames.com/ru/free-games',
-      end:'2026-02-27T16:00:00.000Z',
-      store:'epic',worth:3.99,hot:false
-    },
-    {
-      id:'fb-gog-mystery',
-      title:'Mystery GOG Giveaway',
-      desc:'Бесплатная раздача на GOG.com — зайди на сайт и проверь, что раздают прямо сейчас!',
-      img:'https://www.gamerpower.com/offers/1/6703e7f7e573c.jpg',
-      url:'https://www.gog.com/#giveaway',
-      end:null,
-      store:'gog',worth:0,hot:false
-    },
-    {
-      id:'fb-indie1',
-      title:'Aerial_Knight\'s Never Yield',
-      desc:'Стильный 3D раннер с крутым саундтреком. Убегай, уклоняйся, прыгай через препятствия в футуристичном Детройте.',
-      img:'https://www.gamerpower.com/offers/1/6602c64a8b1e8.jpg',
-      url:'https://store.epicgames.com/ru/free-games',
-      end:null,
-      store:'epic',worth:11.99,hot:false
     }
   ];
 
+  /* ═══════════════════════════════════════════
+     BLACKLIST — игры которые НЕ бесплатные
+     Ключевые слова в названиях для фильтрации
+     ═══════════════════════════════════════════ */
+  var TITLE_BLACKLIST = [
+    'demo', 'trial', 'beta', 'alpha', 'playtest',
+    'starter pack', 'starter edition',
+    'free to play', 'free-to-play', 'f2p',
+    'dlc', 'expansion', 'season pass', 'battle pass',
+    'soundtrack', 'artbook', 'art book', 'wallpaper',
+    'bonus content', 'cosmetic', 'skin pack',
+    'in-game', 'virtual currency', 'coin', 'gems',
+    'loot box', 'loot crate', 'mystery box',
+    'coupon', 'discount', 'voucher', '% off'
+  ];
+
+  /* Игры которые изначально free-to-play (не раздача) */
+  var F2P_BLACKLIST = [
+    'fortnite', 'apex legends', 'warframe', 'dota 2', 'dota2',
+    'league of legends', 'valorant', 'genshin impact',
+    'counter-strike', 'cs2', 'csgo', 'cs:go',
+    'team fortress 2', 'tf2', 'path of exile', 'poe',
+    'destiny 2', 'lost ark', 'world of tanks',
+    'war thunder', 'world of warships', 'hearthstone',
+    'rocket league', 'fall guys', 'multiversus',
+    'the finals', 'xdefiant', 'overwatch 2',
+    'palworld', 'honkai', 'star rail', 'zenless zone zero'
+  ];
+
+  /* ═══════════════════════════════════════════
+     STATE
+     ═══════════════════════════════════════════ */
   var games = [];
   var tab = 'all';
   var filt = 'all';
   var sort = 'date';
-  var taken = [];
-  try { taken = JSON.parse(localStorage.getItem('fgtaken') || '[]'); } catch(e) { taken = []; }
+  var taken = {};    // { id: { ts: timestamp, worth: number } }
+  var loading = true;
+  var dataSource = 'none';
 
+  /* ═══════════════════════════════════════════
+     STORAGE — localStorage + cookie backup
+     ═══════════════════════════════════════════ */
+  function setCookie(name, val, days) {
+    var d = new Date();
+    d.setTime(d.getTime() + (days || 365) * 86400000);
+    document.cookie = name + '=' + encodeURIComponent(val) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
+
+  function getCookie(name) {
+    var n = name + '=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i].trim();
+      if (c.indexOf(n) === 0) return decodeURIComponent(c.substring(n.length));
+    }
+    return null;
+  }
+
+  function loadTaken() {
+    try {
+      var raw = localStorage.getItem('fgtaken2');
+      if (raw) { taken = JSON.parse(raw); return; }
+    } catch(e) {}
+    // Fallback: try cookie
+    try {
+      var ck = getCookie('fgtaken2');
+      if (ck) { taken = JSON.parse(ck); return; }
+    } catch(e) {}
+    // Migrate from old format (array of ids)
+    try {
+      var old = JSON.parse(localStorage.getItem('fgtaken') || '[]');
+      if (Array.isArray(old) && old.length > 0) {
+        taken = {};
+        old.forEach(function(id) { taken[id] = { ts: Date.now(), worth: 0 }; });
+        saveTaken();
+        return;
+      }
+    } catch(e) {}
+    taken = {};
+  }
+
+  function saveTaken() {
+    var json = JSON.stringify(taken);
+    try { localStorage.setItem('fgtaken2', json); } catch(e) {}
+    // Backup to cookie (max ~4KB, truncate if needed)
+    try {
+      if (json.length < 3500) setCookie('fgtaken2', json, 365);
+    } catch(e) {}
+  }
+
+  function loadPrefs() {
+    try {
+      var p = JSON.parse(localStorage.getItem('fgprefs') || '{}');
+      if (p.sort) sort = p.sort;
+      if (p.hideTaken) $('fg-hideTaken').checked = true;
+    } catch(e) {}
+  }
+
+  function savePrefs() {
+    try {
+      localStorage.setItem('fgprefs', JSON.stringify({
+        sort: sort,
+        hideTaken: $('fg-hideTaken').checked
+      }));
+    } catch(e) {}
+  }
+
+  /* ═══════════════════════════════════════════
+     DOM HELPERS
+     ═══════════════════════════════════════════ */
   function $(id) { return document.getElementById(id); }
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
 
+  /* ═══════════════════════════════════════════
+     TOAST NOTIFICATIONS
+     ═══════════════════════════════════════════ */
+  var toastTimer = null;
+  function showToast(msg, type) {
+    var t = $('fg-toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' toast-' + type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  /* ═══════════════════════════════════════════
+     FETCH with timeout + CORS proxy fallback
+     ═══════════════════════════════════════════ */
   function fetchWithTimeout(url, ms) {
     return new Promise(function(ok, no) {
       var c = new AbortController();
@@ -266,7 +386,10 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     });
   }
 
-  var CK = 'fgcache6';
+  /* ═══════════════════════════════════════════
+     CACHE (30 min)
+     ═══════════════════════════════════════════ */
+  var CK = 'fgcache7';
   var CTL = 30 * 60 * 1000;
 
   function cacheGet() {
@@ -281,6 +404,43 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), data: d })); } catch(e) {}
   }
 
+  /* ═══════════════════════════════════════════
+     VERIFY: Is game ACTUALLY free?
+     ═══════════════════════════════════════════ */
+  function isActuallyFree(g) {
+    var t = (g.title || '').toLowerCase();
+    var d = (g.desc || '').toLowerCase();
+    var combined = t + ' ' + d;
+
+    // Check blacklisted words in title
+    for (var i = 0; i < TITLE_BLACKLIST.length; i++) {
+      if (t.indexOf(TITLE_BLACKLIST[i]) >= 0) return false;
+    }
+
+    // Check if it's an always-free game (not a giveaway)
+    for (var j = 0; j < F2P_BLACKLIST.length; j++) {
+      if (t.indexOf(F2P_BLACKLIST[j]) >= 0) return false;
+    }
+
+    // Must have a valid type — reject DLC, loot, early access demos
+    if (g._rawType) {
+      var rt = g._rawType.toLowerCase();
+      if (rt.indexOf('dlc') >= 0 || rt.indexOf('loot') >= 0 || rt.indexOf('early') >= 0) return false;
+    }
+
+    // If status from API is not Active, skip
+    if (g._rawStatus && g._rawStatus !== 'Active') return false;
+
+    // If worth is exactly 0 and no end date — might be always free, be cautious
+    // But allow if from known giveaway sources
+    if (g.worth === 0 && !g.end && g.store === 'other') return false;
+
+    return true;
+  }
+
+  /* ═══════════════════════════════════════════
+     NORMALIZE
+     ═══════════════════════════════════════════ */
   function norm(g) {
     return {
       id: g.id || '',
@@ -292,10 +452,16 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
       store: g.store || 'other',
       worth: g.worth || 0,
       hot: !!g.hot,
-      ts: g.ts || Date.now()
+      ts: g.ts || Date.now(),
+      verified: !!g.verified,
+      _rawType: g._rawType || '',
+      _rawStatus: g._rawStatus || ''
     };
   }
 
+  /* ═══════════════════════════════════════════
+     API: GamerPower
+     ═══════════════════════════════════════════ */
   function mapStore(p) {
     p = (p || '').toLowerCase();
     if (p.indexOf('epic') >= 0) return 'epic';
@@ -324,12 +490,18 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
           store: mapStore(g.platforms),
           worth: w,
           hot: w > 15,
-          ts: Date.now()
+          ts: Date.now(),
+          verified: true,
+          _rawType: g.type || '',
+          _rawStatus: g.status || ''
         });
-      }).filter(function(g) { return g.title; });
+      }).filter(function(g) { return g.title && isActuallyFree(g); });
     });
   }
 
+  /* ═══════════════════════════════════════════
+     API: Epic Games Store
+     ═══════════════════════════════════════════ */
   function fetchEpic() {
     return smartFetch('https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US', 10000).then(function(data) {
       var el = (data && data.data && data.data.Catalog && data.data.Catalog.searchStore && data.data.Catalog.searchStore.elements) || [];
@@ -340,6 +512,16 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
         var off = g.promotions.promotionalOffers || [];
         if (!off.length || !off[0].promotionalOffers || !off[0].promotionalOffers.length) continue;
         var o = off[0].promotionalOffers[0];
+
+        // ✅ VERIFY: check discount is actually 100% (0 final price)
+        var discountPct = 0;
+        try { discountPct = o.discountSetting && o.discountSetting.discountPercentage; } catch(e) {}
+        if (discountPct !== 0) continue; // 0 means free in Epic's API (confusing but true)
+
+        var currentPrice = 0;
+        try { currentPrice = g.price.totalPrice.discountPrice; } catch(e) { currentPrice = -1; }
+        if (currentPrice !== 0) continue; // Must be exactly 0
+
         var img = '';
         var ki = g.keyImages || [];
         var preferred = ['DieselStoreFrontWide', 'OfferImageWide', 'DieselStoreFrontTall', 'OfferImageTall', 'Thumbnail', 'DieselGameBoxWide'];
@@ -350,10 +532,12 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
           if (img) break;
         }
         if (!img && ki.length) img = ki[0].url;
+
         var sl = g.productSlug || g.urlSlug || (g.offerMappings && g.offerMappings[0] && g.offerMappings[0].pageSlug) || '';
         var w = 0;
         try { var pr = g.price && g.price.totalPrice; if (pr && pr.originalPrice) w = pr.originalPrice / 100; } catch(e) {}
-        out.push(norm({
+
+        var game = norm({
           id: 'ep-' + g.id,
           title: g.title || '',
           desc: g.description || 'Бесплатно в Epic Games Store',
@@ -363,13 +547,21 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
           store: 'epic',
           worth: w,
           hot: true,
-          ts: Date.now()
-        }));
+          ts: Date.now(),
+          verified: true,
+          _rawType: 'game',
+          _rawStatus: 'Active'
+        });
+
+        if (isActuallyFree(game)) out.push(game);
       }
       return out;
     });
   }
 
+  /* ═══════════════════════════════════════════
+     MERGE without duplicates
+     ═══════════════════════════════════════════ */
   function mergeGames() {
     var args = [].slice.call(arguments);
     var seen = {};
@@ -384,34 +576,140 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     return out;
   }
 
-  function saveTaken() { try { localStorage.setItem('fgtaken', JSON.stringify(taken)); } catch(e) {} }
-  function isTaken(id) { return taken.indexOf(id) >= 0; }
+  /* ═══════════════════════════════════════════
+     TAKEN (claimed games)
+     ═══════════════════════════════════════════ */
+  function isTaken(id) { return !!taken[id]; }
 
   function toggleTaken(id) {
-    var i = taken.indexOf(id);
-    if (i > -1) taken.splice(i, 1); else taken.push(id);
+    if (taken[id]) {
+      delete taken[id];
+      showToast('Убрано из забранных', 'info');
+    } else {
+      var game = games.find(function(g) { return g.id === id; });
+      taken[id] = { ts: Date.now(), worth: game ? game.worth : 0 };
+      showToast('✓ Отмечено как забранное!', 'success');
+    }
     saveTaken();
-    $('fg-tc').textContent = taken.length;
+    updateTakenCount();
     render();
   }
   window._fgToggleTaken = toggleTaken;
 
+  function updateTakenCount() {
+    $('fg-tc').textContent = Object.keys(taken).length;
+  }
+
+  function getTakenSavings() {
+    var total = 0;
+    Object.keys(taken).forEach(function(id) {
+      var w = taken[id].worth || 0;
+      if (w > 0) total += w;
+      else {
+        // Try to find worth from current games list
+        var game = games.find(function(g) { return g.id === id; });
+        if (game && game.worth > 0) total += game.worth;
+      }
+    });
+    return total;
+  }
+
+  /* ═══════════════════════════════════════════
+     EXPORT / IMPORT
+     ═══════════════════════════════════════════ */
+  function exportTaken() {
+    var data = {
+      version: 2,
+      exported: new Date().toISOString(),
+      taken: taken,
+      count: Object.keys(taken).length
+    };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'free-games-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📤 Экспортировано ' + Object.keys(taken).length + ' игр', 'success');
+  }
+
+  function importTaken(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (data.taken && typeof data.taken === 'object') {
+          // Merge with existing
+          Object.keys(data.taken).forEach(function(id) {
+            if (!taken[id]) taken[id] = data.taken[id];
+          });
+          saveTaken();
+          updateTakenCount();
+          render();
+          showToast('📥 Импортировано! Всего: ' + Object.keys(taken).length + ' игр', 'success');
+        } else if (Array.isArray(data)) {
+          // Old format (array of ids)
+          data.forEach(function(id) {
+            if (!taken[id]) taken[id] = { ts: Date.now(), worth: 0 };
+          });
+          saveTaken();
+          updateTakenCount();
+          render();
+          showToast('📥 Импортировано из старого формата!', 'success');
+        } else {
+          showToast('❌ Неверный формат файла', 'error');
+        }
+      } catch(err) {
+        showToast('❌ Ошибка чтения файла', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  /* ═══════════════════════════════════════════
+     COUNTDOWN
+     ═══════════════════════════════════════════ */
   function countdown(end) {
     if (!end) return null;
     try {
       var d = new Date(end).getTime() - Date.now();
-      if (d < 0) return null;
-      return Math.floor(d / 864e5) + 'д ' + Math.floor((d % 864e5) / 36e5) + 'ч ' + Math.floor((d % 36e5) / 6e4) + 'м';
+      if (d < 0) return { expired: true, text: 'Раздача закончилась' };
+      var days = Math.floor(d / 864e5);
+      var hrs = Math.floor((d % 864e5) / 36e5);
+      var mins = Math.floor((d % 36e5) / 6e4);
+      return { expired: false, text: days + 'д ' + hrs + 'ч ' + mins + 'м' };
     } catch(e) { return null; }
   }
 
+  function isNew(g) {
+    // Game added in last 48 hours
+    return g.ts && (Date.now() - g.ts < 48 * 3600 * 1000);
+  }
+
+  function isExpired(g) {
+    if (!g.end) return false;
+    return new Date(g.end).getTime() < Date.now();
+  }
+
+  /* ═══════════════════════════════════════════
+     SORT
+     ═══════════════════════════════════════════ */
   function sortGames(arr) {
     var c = arr.slice();
     if (sort === 'value') c.sort(function(a, b) { return (b.worth || 0) - (a.worth || 0); });
     else if (sort === 'az') c.sort(function(a, b) { return a.title.localeCompare(b.title); });
+    else if (sort === 'ending') c.sort(function(a, b) {
+      var ae = a.end ? new Date(a.end).getTime() : Infinity;
+      var be = b.end ? new Date(b.end).getTime() : Infinity;
+      return ae - be;
+    });
     return c;
   }
 
+  /* ═══════════════════════════════════════════
+     IMAGE ERROR HANDLER
+     ═══════════════════════════════════════════ */
   function imgError(el) {
     el.style.display = 'none';
     var ph = el.nextElementSibling;
@@ -419,14 +717,39 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
   }
   window._fgImgError = imgError;
 
+  /* ═══════════════════════════════════════════
+     SKELETON LOADING
+     ═══════════════════════════════════════════ */
+  function skeletonHTML() {
+    var h = '<div class="skeleton-grid">';
+    for (var i = 0; i < 6; i++) {
+      h += '<div class="skeleton-card">' +
+        '<div class="skeleton-img"></div>' +
+        '<div class="skeleton-body">' +
+          '<div class="skeleton-line w80"></div>' +
+          '<div class="skeleton-line w60"></div>' +
+          '<div class="skeleton-line w40"></div>' +
+        '</div>' +
+      '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  /* ═══════════════════════════════════════════
+     CARD HTML
+     ═══════════════════════════════════════════ */
   function cardHTML(g, i) {
     var tkn = isTaken(g.id);
     var cd = countdown(g.end);
+    var expired = isExpired(g);
+
     var gr = 'linear-gradient(135deg,#1e1b4b,#312e81)';
     if (g.store === 'epic') gr = 'linear-gradient(135deg,#1a1a2e,#16213e)';
     if (g.store === 'gog') gr = 'linear-gradient(135deg,#1a0a2e,#2d1b69)';
     if (g.store === 'steam') gr = 'linear-gradient(135deg,#1b2838,#2a475e)';
     if (g.store === 'itchio') gr = 'linear-gradient(135deg,#2e1a1a,#691b1b)';
+
     var imgH = '';
     if (g.img) {
       imgH =
@@ -435,12 +758,30 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     } else {
       imgH = '<div class="gi-ph" style="background:' + gr + '">' + esc(g.title) + '</div>';
     }
-    var badges = '<span class="badge b-' + (g.store || 'other') + '">' + (g.store || 'other').toUpperCase() + '</span>';
+
+    var badges = '';
+    if (g.verified) badges += '<span class="badge b-verified">✓ Проверено</span>';
+    badges += '<span class="badge b-' + (g.store || 'other') + '">' + (g.store || 'other').toUpperCase() + '</span>';
     if (g.worth > 0) badges += '<span class="badge b-val">$' + (g.worth || 0).toFixed(0) + ' value</span>';
-    if (g.hot) badges += '<span class="badge b-hot">🔥 HOT</span>';
+    if (isNew(g)) badges += '<span class="badge b-new">🆕 NEW</span>';
+    if (g.hot && !expired) badges += '<span class="badge b-hot">🔥 HOT</span>';
+    if (expired) badges += '<span class="badge b-expired">⏰ ИСТЕКЛО</span>';
     if (tkn) badges += '<span class="badge b-taken">✓ ЗАБРАНО</span>';
+
+    var cdHTML = '';
+    if (cd) {
+      if (cd.expired) {
+        cdHTML = '<div class="cd cd-expired"><div class="cd-t">⏰ Статус:</div><div class="cd-v">' + cd.text + '</div></div>';
+      } else {
+        cdHTML = '<div class="cd"><div class="cd-t">⏰ Осталось:</div><div class="cd-v">' + cd.text + '</div></div>';
+      }
+    }
+
+    var linkClass = 'gc-link' + (expired ? ' disabled' : '');
+    var linkText = expired ? 'Закончилась' : 'Забрать →';
+
     return '' +
-    '<div class="gc" style="animation-delay:' + (i * 0.04) + 's">' +
+    '<div class="gc' + (expired ? ' expired-card' : '') + '" style="animation-delay:' + (i * 0.04) + 's">' +
       '<button class="take-btn ' + (tkn ? 'on' : '') + '" title="' + (tkn ? 'Убрать из забранных' : 'Пометить как забранное') + '" onclick="_fgToggleTaken(\'' + g.id + '\')">' + (tkn ? '✓' : '＋') + '</button>' +
       imgH +
       '<div class="gc-body">' +
@@ -449,42 +790,58 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
           '<div class="gc-badges">' + badges + '</div>' +
         '</div>' +
         '<p class="gc-desc">' + esc(g.desc) + '</p>' +
-        (cd ? '<div class="cd"><div class="cd-t">⏰ Осталось:</div><div class="cd-v">' + cd + '</div></div>' : '') +
+        cdHTML +
         '<div class="gc-foot">' +
           '<div class="p-free">Бесплатно</div>' +
-          '<a href="' + esc(g.url) + '" target="_blank" rel="noopener" class="gc-link">Забрать →</a>' +
+          '<a href="' + esc(g.url) + '" target="_blank" rel="noopener" class="' + linkClass + '">' + linkText + '</a>' +
         '</div>' +
       '</div>' +
     '</div>';
   }
 
+  /* ═══════════════════════════════════════════
+     RENDER
+     ═══════════════════════════════════════════ */
   function render() {
     var el = $('fg-ct');
     var q = ($('fg-sb').value || '').toLowerCase();
-    var now = Date.now();
-    var active = games.filter(function(g) { return !g.end || new Date(g.end).getTime() > now; });
+
+    // Split by expired/active
+    var active = games.filter(function(g) { return !isExpired(g); });
+    var expiredGames = games.filter(function(g) { return isExpired(g); });
+
     var list;
     if (tab === 'taken') {
-      list = active.filter(function(g) { return isTaken(g.id); });
+      list = games.filter(function(g) { return isTaken(g.id); });
+    } else if (tab === 'expired') {
+      list = expiredGames;
     } else {
       list = active.slice();
       if ($('fg-hideTaken').checked) {
         list = list.filter(function(g) { return !isTaken(g.id); });
       }
     }
+
     if (q) list = list.filter(function(g) { return g.title.toLowerCase().indexOf(q) >= 0; });
     if (filt !== 'all') list = list.filter(function(g) { return g.store === filt; });
     list = sortGames(list);
+
+    // Store filters
+    var sourceList = (tab === 'expired') ? expiredGames : active;
     var stores = [];
-    active.forEach(function(g) { if (stores.indexOf(g.store) < 0) stores.push(g.store); });
+    sourceList.forEach(function(g) { if (stores.indexOf(g.store) < 0) stores.push(g.store); });
     var fh = '<button class="fbtn ' + (filt === 'all' ? 'on' : '') + '" data-filt="all">Все</button>';
     stores.forEach(function(s) {
       fh += '<button class="fbtn ' + (filt === s ? 'on' : '') + '" data-filt="' + s + '">' + s.toUpperCase() + '</button>';
     });
     $('fg-fb').innerHTML = fh;
+
+    // Sort highlighting
     document.querySelectorAll('.sort-btn').forEach(function(b) {
       b.classList.toggle('on', b.getAttribute('data-sort') === sort);
     });
+
+    // Stats
     var sc = {};
     var totalValue = 0;
     list.forEach(function(g) {
@@ -499,25 +856,44 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     if (totalValue > 0) {
       sh += '<div class="stat-card value-card"><div class="stat-number green">$' + totalValue.toFixed(0) + '</div><div class="stat-label green">Ценность</div></div>';
     }
+    // Savings from taken games
+    var savings = getTakenSavings();
+    if (savings > 0) {
+      sh += '<div class="stat-card savings-card"><div class="stat-number blue">$' + savings.toFixed(0) + '</div><div class="stat-label blue">💰 Ты сэкономил</div></div>';
+    }
     $('fg-st').innerHTML = sh;
+
+    // Cards
     if (list.length) {
       el.innerHTML = '<div class="games-grid">' + list.map(cardHTML).join('') + '</div>';
     } else {
-      el.innerHTML = '<div class="empty">' + (tab === 'taken' ? '📋 Пока ничего не отмечено как «Забрано»' : '🔍 Ничего не найдено') + '</div>';
+      var emptyMsg = '🔍 Ничего не найдено';
+      if (tab === 'taken') emptyMsg = '📋 Пока ничего не отмечено как «Забрано»';
+      if (tab === 'expired') emptyMsg = '📦 Нет истёкших раздач';
+      el.innerHTML = '<div class="empty">' + emptyMsg + '</div>';
     }
   }
 
+  /* ═══════════════════════════════════════════
+     BADGES
+     ═══════════════════════════════════════════ */
   function showBadge(src) {
+    dataSource = src;
     $('fg-live').style.display = (src === 'live') ? 'inline-block' : 'none';
     $('fg-cache').style.display = (src === 'cache') ? 'inline-block' : 'none';
     $('fg-fallback').style.display = (src === 'fallback') ? 'inline-block' : 'none';
   }
 
+  /* ═══════════════════════════════════════════
+     EVENT HANDLERS
+     ═══════════════════════════════════════════ */
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('.fbtn[data-filt]');
     if (btn) { filt = btn.getAttribute('data-filt'); render(); return; }
+
     var sortBtn = e.target.closest('.sort-btn[data-sort]');
-    if (sortBtn) { sort = sortBtn.getAttribute('data-sort'); render(); return; }
+    if (sortBtn) { sort = sortBtn.getAttribute('data-sort'); savePrefs(); render(); return; }
+
     var tabBtn = e.target.closest('.tab[data-t]');
     if (tabBtn) {
       tab = tabBtn.getAttribute('data-t');
@@ -531,15 +907,47 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
   });
 
   $('fg-sb').addEventListener('input', function() { render(); });
-  $('fg-hideTaken').addEventListener('change', function() { render(); });
+  $('fg-hideTaken').addEventListener('change', function() { savePrefs(); render(); });
 
+  $('fg-export').addEventListener('click', exportTaken);
+  $('fg-import').addEventListener('click', function() { $('fg-file-input').click(); });
+  $('fg-file-input').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+      importTaken(e.target.files[0]);
+      e.target.value = '';
+    }
+  });
+  $('fg-clear-taken').addEventListener('click', function() {
+    if (Object.keys(taken).length === 0) {
+      showToast('Список уже пуст', 'info');
+      return;
+    }
+    if (confirm('Очистить список забранных игр? (' + Object.keys(taken).length + ' шт.)')) {
+      taken = {};
+      saveTaken();
+      updateTakenCount();
+      render();
+      showToast('🗑️ Список очищен', 'info');
+    }
+  });
+
+  /* ═══════════════════════════════════════════
+     INIT
+     ═══════════════════════════════════════════ */
+  loadTaken();
+  loadPrefs();
   $('fg-ut').textContent = new Date().toLocaleString('ru-RU');
-  $('fg-tc').textContent = taken.length;
+  updateTakenCount();
 
+  // 1) Show skeleton loading
+  $('fg-ct').innerHTML = skeletonHTML();
+
+  // 2) Show fallback immediately
   games = FALLBACK.map(norm);
   showBadge('fallback');
   render();
 
+  // 3) Check cache
   var cached = cacheGet();
   if (cached && cached.length > 0) {
     games = cached.map(norm);
@@ -547,23 +955,30 @@ body{font-family:'Nunito',sans-serif;background:#0d0f1a;min-height:100vh;padding
     render();
   }
 
+  // 4) Fetch live data
   var pGP = fetchGP().catch(function() { return []; });
   var pEpic = fetchEpic().catch(function() { return []; });
 
   Promise.all([pGP, pEpic]).then(function(res) {
     var gp = res[0] || [];
     var epic = res[1] || [];
-    var fb = FALLBACK.map(norm);
+    var fb = FALLBACK.map(norm).filter(isActuallyFree);
+
     if (gp.length > 0 || epic.length > 0) {
-      games = mergeGames(gp, epic, fb);
+      games = mergeGames(epic, gp, fb);
       showBadge('live');
       cacheSet(games);
+      showToast('✅ Данные обновлены — ' + games.length + ' игр', 'success');
     }
+
+    loading = false;
     $('fg-ut').textContent = new Date().toLocaleString('ru-RU');
     render();
   });
 
+  // Update timers every minute
   setInterval(render, 60000);
+
 })();
 </script>
 
