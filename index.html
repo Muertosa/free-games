@@ -88,7 +88,9 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;paddi
 .nav-btn{padding:10px 24px;font-weight:800;font-size:14px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-family:inherit;transition:all .2s}
 .nav-btn.on{background:linear-gradient(135deg,#6d28d9,#7c3aed);border-color:transparent;color:#fff;box-shadow:0 4px 20px rgba(124,58,237,0.3)}
 .nav-btn:hover:not(.on){background:rgba(255,255,255,0.07)}
-.nav-count{font-size:11px;opacity:.7;margin-left:4px}
+.nav-count{font-size:11px;opacity:.7;margin-left:6px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;position:relative}
+.nav-count.loading{opacity:.9}
+.nav-count.loading::before{content:"";width:12px;height:12px;border-radius:50%;border:2px solid rgba(148,163,184,0.28);border-top-color:var(--accent2);animation:spin 0.9s linear infinite}
 .controls{background:rgba(255,255,255,0.03);padding:16px;border-radius:14px;margin-bottom:16px;border:1px solid var(--border)}
 .search-box{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:rgba(255,255,255,0.04);color:var(--text);font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:12px}
 .search-box:focus{border-color:rgba(124,58,237,0.5)}
@@ -205,6 +207,7 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 @keyframes popIn{0%{transform:scale(.5)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:640px){
   body{padding:16px 8px 40px}
   .games-grid,.sk-grid{grid-template-columns:1fr;gap:14px}
@@ -344,6 +347,9 @@ var sec='free',FG=[],DG=[],fTab='active',fFl='all',fSo='date',dFl='all',dSo='sav
 
 function $(id){return document.getElementById(id)}
 function esc(s){var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML}
+
+function setCountLoading(el){if(!el)return;el.classList.add('loading');el.textContent=''}
+function setCount(el,val){if(!el)return;el.classList.remove('loading');el.textContent=String(val)}
 var _tt;function toast(m,t){var e=$('toast');e.textContent=m;e.className='toast show'+(t?' t-'+t:'');clearTimeout(_tt);_tt=setTimeout(function(){e.classList.remove('show')},3000)}
 function loadTk(){try{taken=JSON.parse(localStorage.getItem('gv_t')||'{}')}catch(e){taken={}}}
 function saveTk(){try{localStorage.setItem('gv_t',JSON.stringify(taken))}catch(e){}}
@@ -381,7 +387,7 @@ function isTk(id){return!!taken[id]}
 function togTk(id){var btn=document.querySelector('.take-btn[data-id="'+id+'"]');if(taken[id]){delete taken[id];toast('Убрано','info')}else{var g=FG.find(function(x){return x.id===id});taken[id]={ts:Date.now(),w:g?g.worth:0};toast('✓ Забрано!','ok')}if(btn){btn.classList.add('pop');setTimeout(function(){btn.classList.remove('pop')},400)}saveTk();updC();renF()}
 window._T=togTk;
 function getSav(){var t=0;Object.keys(taken).forEach(function(id){var w=taken[id].w||0;if(w>0)t+=w;else{var g=FG.find(function(x){return x.id===id});if(g&&g.worth>0)t+=g.worth}});return t}
-function updC(){var a=FG.filter(function(g){return!isX(g)});$('cA').textContent=a.length;$('cT').textContent=Object.keys(taken).length;$('cE').textContent=FG.filter(function(g){return isX(g)}).length;$('navF').textContent=a.length}
+function updC(){var a=FG.filter(function(g){return!isX(g)});$('cA').textContent=a.length;$('cT').textContent=Object.keys(taken).length;$('cE').textContent=FG.filter(function(g){return isX(g)}).length;setCount($('navF'),a.length)}
 function cdF(end){if(!end)return null;try{var d=new Date(end).getTime()-Date.now();if(d<0)return{x:true,t:'Раздача закончилась'};var dy=Math.floor(d/864e5),h=Math.floor(d%864e5/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);return{x:false,t:dy>0?dy+'д '+h+'ч '+m+'м':h+'ч '+m+'м '+s+'с',ms:d,e:d<864e5}}catch(e){return null}}
 function isX(g){return g.end?new Date(g.end).getTime()<Date.now():false}
 function isEn(g){if(!g.end)return false;var d=new Date(g.end).getTime()-Date.now();return d>0&&d<864e5}
@@ -468,7 +474,7 @@ return true
 }).map(function(d){
 return{id:'cs-'+d.dealID,title:d.title||'',thumb:d.thumb||'',sale:parseFloat(d.salePrice)||0,normal:parseFloat(d.normalPrice)||0,pct:Math.round(parseFloat(d.savings)||0),rating:parseFloat(d.steamRatingPercent)||0,ratingText:d.steamRatingText||'',reviews:parseInt(d.steamRatingCount)||0,storeID:d.storeID,storeName:CSN[d.storeID]||'Store',meta:parseInt(d.metacriticScore)||0,url:'https://www.cheapshark.com/redirect?dealID='+d.dealID}
 });
-$('navD').textContent=DG.length;
+setCount($('navD'),DG.length);
 return DG
 })
 }
@@ -511,6 +517,7 @@ $('dPg').innerHTML=ph
 
 function loadF(force){
 showSB('load','⏳ загрузка...');
+setCountLoading($('navF'));
 if(!force){
 var c=cGet('gv_f');
 if(c&&c.length){FG=c.map(nrm);showSB('cache','📦 кэш');updC();renF()}
@@ -535,6 +542,7 @@ updC();renF()
 }
 function loadD(force){
 showSB('load','⏳ скидки...');
+setCountLoading($('navD'));
 if(!force&&dLoaded){renD();showSB('hide');return}
 if(!force){
 var c=cGet('gv_d');
@@ -555,8 +563,8 @@ $('dO').innerHTML='<div class="empty">⚠️ Не удалось загрузи�
 }
 function primeDealsCount(){
 var c=cGet('gv_d');
-if(c&&c.length){DG=c;$('navD').textContent=c.length;dLoaded=true}
-fetchDeals().then(function(){cSet('gv_d',DG);dLoaded=true}).catch(function(){if(c&&c.length){DG=c;$('navD').textContent=c.length;dLoaded=true}})
+if(c&&c.length){DG=c;setCount($('navD'),c.length);dLoaded=true}
+fetchDeals().then(function(){cSet('gv_d',DG);dLoaded=true}).catch(function(){if(c&&c.length){DG=c;setCount($('navD'),c.length);dLoaded=true}})
 }
 function switchS(s){
 sec=s;
@@ -615,6 +623,8 @@ loadTk();loadPr();apTh();
 $('rMn').value=dMn;$('rvMn').textContent=dMn+'%';$('rMx').value=dMx;$('rvMx').textContent=dMx+'%';$('rPr').value=dPr;$('rvPr').textContent=dPr>=60?'Любая':'$'+dPr;
 $('upTime').textContent=new Date().toLocaleString('ru-RU');
 $('fO').innerHTML=skel(6);
+setCountLoading($('navF'));
+setCountLoading($('navD'));
 loadF(false);
 primeDealsCount();
 setInterval(updTm,1000);
