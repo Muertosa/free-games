@@ -16,20 +16,19 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-62LT5H19BP');
 </script>
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="Платные игры бесплатно — актуальные раздачи, забрать навсегда | FreeGamer">
+<meta property="og:title" content="Платные игры бесплатно — актуальные раздачи, забрать навсегда | FreeGamer🎮">
 <meta property="og:description" content="Раздачи платных игр: успей забрать бесплатно и оставить навсегда. Epic Games, Steam и другие сервисы.">
 <meta property="og:url" content="https://muertosa.github.io/free-games/">
 <meta property="og:site_name" content="FreeGamer">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Платные игры бесплатно — актуальные раздачи | FreeGamer">
+<meta name="twitter:title" content="Платные игры бесплатно — актуальные раздачи | FreeGamer🎮">
 <meta name="twitter:description" content="Раздачи платных игр: забирай бесплатно и навсегда.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,7 +59,16 @@ body.light{--bg:#f0f2f8;--card:#fff;--border:rgba(0,0,0,0.08);--text:#1e293b;--t
 body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;padding:24px 16px 60px;color:var(--text);transition:background .3s,color .3s}
 .container{max-width:1360px;margin:0 auto}
 .header{text-align:center;margin-bottom:28px}
-.logo{font-family:'Unbounded',sans-serif;font-size:clamp(26px,5vw,48px);font-weight:900;background:linear-gradient(135deg,#7c3aed,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.logo-row{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:6px}
+.logo{font-family:'Unbounded',sans-serif;font-size:clamp(26px,5vw,48px);font-weight:900;background:linear-gradient(135deg,#7c3aed,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-pad{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(124,58,237,.22),rgba(96,165,250,.14));border:1px solid var(--border);box-shadow:0 10px 34px rgba(124,58,237,.12);position:relative}
+.logo-pad::after{content:"";position:absolute;inset:-18px;border-radius:22px;background:radial-gradient(circle,rgba(124,58,237,.22),transparent 65%);filter:blur(10px);opacity:.7;pointer-events:none}
+.logo-pad span{font-size:28px;line-height:1;filter:drop-shadow(0 8px 18px rgba(124,58,237,.25))}
+@media(max-width:640px){
+  .logo-pad{width:46px;height:46px;border-radius:14px}
+  .logo-pad span{font-size:24px}
+}
+
 .subtitle{font-size:14px;color:var(--text3);margin-bottom:12px}
 .meta-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}
 .update-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;background:rgba(255,255,255,0.04);border-radius:50px;color:var(--text3);font-size:12px;border:1px solid var(--border)}
@@ -134,7 +142,14 @@ body.light .gc{box-shadow:0 2px 10px rgba(0,0,0,0.05)}
 .b-expired{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2)}
 .b-ending{background:rgba(251,146,60,0.12);color:#fb923c;border:1px solid rgba(251,146,60,0.2);animation:pulse 1.5s infinite}
 .b-deal{background:rgba(124,58,237,0.12);color:var(--accent2);border:1px solid rgba(124,58,237,0.2)}
-.gc-desc{color:var(--text3);font-size:12px;line-height:1.5;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gc-desc-wrap{margin-bottom:14px}
+.gc-desc{color:var(--text3);font-size:12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gc.open .gc-desc{-webkit-line-clamp:unset;display:block;overflow:visible}
+.desc-toggle{margin-top:8px;display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border);color:var(--text2);padding:6px 10px;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s}
+.desc-toggle:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.desc-toggle .arr{opacity:.8;display:inline-block;transition:transform .2s}
+.gc.open .desc-toggle .arr{transform:rotate(180deg)}
+
 .cd{background:rgba(239,68,68,0.06);padding:7px 10px;border-radius:7px;margin-bottom:12px;text-align:center;border:1px solid rgba(239,68,68,0.1)}
 .cd-t{font-size:10px;color:#f87171;font-weight:700}.cd-v{font-size:14px;font-weight:900;color:#f87171;margin-top:2px;font-family:'Unbounded',sans-serif}
 .cd.cde{background:rgba(251,146,60,0.08);border-color:rgba(251,146,60,0.15)}.cd.cde .cd-t,.cd.cde .cd-v{color:#fb923c}
@@ -200,7 +215,10 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
 
 <div class="container">
   <div class="header">
-    <div class="logo">FreeGamer🎮</div>
+    <div class="logo-row">
+      <div class="logo">FreeGamer</div>
+      <div class="logo-pad" aria-hidden="true"><span>🎮</span></div>
+    </div>
     <p class="subtitle">Платные игры, которые сейчас можно забрать бесплатно. Скидки как дополнительная опция.</p>
     <div class="meta-row">
       <span class="update-badge">Обновлено: <span id="upTime"></span></span>
@@ -385,7 +403,7 @@ if(c.x)cdH='<div class="cd cdx"><div class="cd-t">⏰</div><div class="cd-v">'+c
 else cdH='<div class="cd'+(c.e?' cde':'')+'"><div class="cd-t">'+(c.e?'⚡ Скоро кончится!':'⏰ Осталось:')+'</div><div class="cd-v" data-end="'+g.end+'">'+c.t+'</div></div>'
 }
 var desc=pickDesc(g.desc,'Описание игры появится скоро.');
-return'<div class="gc'+(xp?' xp':'')+(en&&!xp?' end':'')+'" style="animation-delay:'+(i*.03)+'s"><button class="take-btn'+(tk?' on':'')+'" data-id="'+g.id+'" onclick="_T(\''+g.id+'\')">'+(tk?'✓':'＋')+'</button>'+imgH+'<div class="gc-body"><div class="gc-head"><h3 class="gc-title">'+esc(g.title)+'</h3><div class="gc-badges">'+b+'</div></div><p class="gc-desc">'+esc(desc)+'</p>'+cdH+'<div class="gc-foot"><div class="p-free">Бесплатно</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener" class="gc-link'+(xp?' dis':'')+'">'+(xp?'Закончилась':'Забрать →')+'</a></div></div></div>'
+return'<div class="gc'+(xp?' xp':'')+(en&&!xp?' end':'')+'" style="animation-delay:'+(i*.03)+'s"><button class="take-btn'+(tk?' on':'')+'" data-id="'+g.id+'" onclick="_T(\''+g.id+'\')">'+(tk?'✓':'＋')+'</button>'+imgH+'<div class="gc-body"><div class="gc-head"><h3 class="gc-title">'+esc(g.title)+'</h3><div class="gc-badges">'+b+'</div></div><div class="gc-desc-wrap"><p class="gc-desc">'+esc(desc)+'</p>'+(desc&&desc.length>140?'<button class="desc-toggle" type="button" data-desc="'+g.id+'"><span class="txt">Подробнее</span><span class="arr">▾</span></button>':'')+'</div>'+cdH+'<div class="gc-foot"><div class="p-free">Бесплатно</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener" class="gc-link'+(xp?' dis':'')+'">'+(xp?'Закончилась':'Забрать →')+'</a></div></div></div>'
 }
 
 function renF(){
@@ -549,6 +567,17 @@ else if(c&&c.x){el.textContent='Закончилась';var p=el.closest('.cd');
 }
 
 document.addEventListener('click',function(e){
+var dt=e.target.closest('[data-desc]');
+if(dt){
+  var card=dt.closest('.gc');
+  if(card){
+    var open=card.classList.toggle('open');
+    var t=dt.querySelector('.txt');
+    if(t)t.textContent=open?'Свернуть':'Подробнее';
+  }
+  return;
+}
+
 var n=e.target.closest('[data-nav]');if(n){switchS(n.getAttribute('data-nav'));return}
 var ff=e.target.closest('[data-ff]');if(ff){fFl=ff.getAttribute('data-ff');renF();return}
 var fs=e.target.closest('[data-fs]');if(fs){fSo=fs.getAttribute('data-fs');savePr();renF();return}
