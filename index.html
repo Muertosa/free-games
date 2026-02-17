@@ -222,6 +222,7 @@ if(list.length>DPP){var ph='';if(dPg>0)ph+='<button class="page-btn" data-dp="'+
 
 function loadF(force){showSB('load','⏳ загрузка...');if(!force){var c=cGet('gv_f');if(c&&c.length){FG=c.map(nrm);showSB('cache','📦 кэш');updC();renF()}}Promise.all([fetchGP().catch(function(){return[]}),fetchEpic().catch(function(){return[]})]).then(function(r){var gp=r[0]||[],ep=r[1]||[];if(gp.length||ep.length){FG=mergeG(ep,gp);withRuDesc(FG).then(function(){cSet('gv_f',FG);showSB('live','✅ LIVE');toast('✅ '+FG.length+' бесплатных игр','ok');$('upTime').textContent=new Date().toLocaleString('ru-RU');updC();renF()})}else{if(!FG.length)showSB('err','❌ API недоступно');$('upTime').textContent=new Date().toLocaleString('ru-RU');updC();renF()}})}
 function loadD(force){showSB('load','⏳ скидки...');if(!force&&dLoaded){renD();showSB('hide');return}if(!force){var c=cGet('gv_d');if(c&&c.length){DG=c;$('navD').textContent=c.length;renD();showSB('cache','📦 кэш');dLoaded=true;return}}$('dO').innerHTML=skel(6);fetchDeals().then(function(){cSet('gv_d',DG);showSB('live','✅ LIVE');toast('🏷️ '+DG.length+' скидок','ok');dLoaded=true;renD()}).catch(function(){if(!DG.length){showSB('err','❌ Ошибка');$('dO').innerHTML='<div class="empty">⚠️ Не удалось загрузить. Попробуйте обновить.</div>'}})}
+function primeDealsCount(){var c=cGet('gv_d');if(c&&c.length){DG=c;$('navD').textContent=c.length;dLoaded=true}fetchDeals().then(function(){cSet('gv_d',DG);dLoaded=true}).catch(function(){if(c&&c.length){DG=c;$('navD').textContent=c.length;dLoaded=true}})}
 function switchS(s){sec=s;document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-nav')===s)});$('secF').style.display=s==='free'?'block':'none';$('secD').style.display=s==='deals'?'block':'none';if(s==='deals')loadD(false);else showSB('hide')}
 function updTm(){document.querySelectorAll('.cd-v[data-end]').forEach(function(el){var c=cdF(el.getAttribute('data-end'));if(c&&!c.x)el.textContent=c.t;else if(c&&c.x){el.textContent='Закончилась';var p=el.closest('.cd');if(p)p.className='cd cdx'}})}
 
@@ -257,6 +258,7 @@ $('rMn').value=dMn;$('rvMn').textContent=dMn+'%';$('rMx').value=dMx;$('rvMx').te
 $('upTime').textContent=new Date().toLocaleString('ru-RU');
 $('fO').innerHTML=skel(6);
 loadF(false);
+primeDealsCount();
 setInterval(updTm,1000);
 })();
 </script>
