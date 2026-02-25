@@ -197,6 +197,18 @@ body.light .seo-details{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
 .seo-body p{font-size:12px;line-height:1.6;color:var(--text2);margin:0 0 8px}
 .seo-body p:last-child{margin-bottom:0}
 
+/* Store pills + Load more */
+.store-pills{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.store-pill{padding:7px 18px;font-weight:800;font-size:13px;border-radius:50px;border:2px solid var(--border);color:var(--text3);cursor:pointer;font-family:inherit;transition:all .2s;background:transparent}
+.store-pill:hover{background:rgba(255,255,255,0.07)}
+.store-pill.on-all{background:linear-gradient(135deg,#6d28d9,#7c3aed);border-color:transparent;color:#fff}
+.store-pill.on-steam{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.4);color:#a5b4fc}
+.store-pill.on-epic{background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.4);color:#60a5fa}
+.load-more-wrap{display:flex;justify-content:center;margin:8px 0 32px}
+.load-more-btn{padding:14px 40px;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit;transition:all .25s;box-shadow:0 4px 20px rgba(124,58,237,0.3)}
+.load-more-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,0.45)}
+.load-more-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
 .theme-toggle{position:fixed;top:14px;right:14px;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);cursor:pointer;z-index:100;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .3s;color:#fbbf24}
 body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
 .theme-toggle:hover{transform:scale(1.1)}
@@ -277,7 +289,12 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
 
   <div id="secD" style="display:none">
     <div class="controls">
-      <input type="text" class="search-box" id="dS" placeholder="🔍 Поиск скидок...">
+      <input type="text" class="search-box" id="dS" placeholder="🔍 Поиск скидок Steam и Epic...">
+      <div class="store-pills">
+        <button class="store-pill on-all" data-store="all">🎮 Все (Steam + Epic)</button>
+        <button class="store-pill" data-store="steam">🔵 Steam</button>
+        <button class="store-pill" data-store="epic">🟣 Epic Games</button>
+      </div>
       <div class="filter-row" id="dFl"></div>
 
       <div class="deals-extra">
@@ -308,6 +325,9 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
     <div class="stats" id="dSt"></div>
     <div id="dO"></div>
     <div class="pagination" id="dPg"></div>
+    <div class="load-more-wrap" id="dLMW" style="display:none">
+      <button class="load-more-btn" id="dLM">🎮 Загрузить ещё 60 игр</button>
+    </div>
   </div>
 
   <section class="seo seo-down">
@@ -344,6 +364,10 @@ var RU_D={epic:'Бесплатно в Epic Games Store, забери и оста
 var CSN={'1':'Steam','25':'Epic Games','7':'GOG','11':'Humble Store','3':'GreenManGaming','15':'Fanatical','8':'Origin','13':'Uplay'};
 
 var sec='free',FG=[],DG=[],fTab='active',fFl='all',fSo='date',dFl='all',dSo='savings',dMn=50,dMx=100,dPr=60,dPg=0,DPP=30,taken={},theme='dark',dLoaded=false;
+// Steam=1, Epic=25 в CheapShark
+var dStore='all',dLoadedPages=0;
+var STORE_IDS={all:'1,25',steam:'1',epic:'25'};
+var STORE_NAMES={'1':'Steam','25':'Epic Games'};
 
 // история всех раздач (для "ценности за всё время")
 var seen={};
@@ -356,8 +380,8 @@ function setCount(el,val){if(!el)return;el.classList.remove('loading');el.textCo
 var _tt;function toast(m,t){var e=$('toast');e.textContent=m;e.className='toast show'+(t?' t-'+t:'');clearTimeout(_tt);_tt=setTimeout(function(){e.classList.remove('show')},3000)}
 function loadTk(){try{taken=JSON.parse(localStorage.getItem('gv_t')||'{}')}catch(e){taken={}}}
 function saveTk(){try{localStorage.setItem('gv_t',JSON.stringify(taken))}catch(e){}}
-function loadPr(){try{var p=JSON.parse(localStorage.getItem('gv_p')||'{}');if(p.fs)fSo=p.fs;if(p.ht)$('hT').checked=true;if(p.th)theme=p.th;if(p.dm)dMn=p.dm;if(p.dx)dMx=p.dx;if(p.dp!==undefined)dPr=p.dp;if(p.ds)dSo=p.ds}catch(e){}}
-function savePr(){try{localStorage.setItem('gv_p',JSON.stringify({fs:fSo,ht:$('hT').checked,th:theme,dm:dMn,dx:dMx,dp:dPr,ds:dSo}))}catch(e){}}
+function loadPr(){try{var p=JSON.parse(localStorage.getItem('gv_p')||'{}');if(p.fs)fSo=p.fs;if(p.ht)$('hT').checked=true;if(p.th)theme=p.th;if(p.dm)dMn=p.dm;if(p.dx)dMx=p.dx;if(p.dp!==undefined)dPr=p.dp;if(p.ds)dSo=p.ds;if(p.dstore)dStore=p.dstore}catch(e){}}
+function savePr(){try{localStorage.setItem('gv_p',JSON.stringify({fs:fSo,ht:$('hT').checked,th:theme,dm:dMn,dx:dMx,dp:dPr,ds:dSo,dstore:dStore}))}catch(e){}}
 function apTh(){document.body.classList.toggle('light',theme==='light');$('themeBtn').textContent=theme==='dark'?'🌙':'☀️'}
 
 // seen storage
@@ -719,18 +743,39 @@ function renF(){
   }
 }
 
-// DEALS
-function fetchDeals(){
+// DEALS — Steam (storeID=1) и Epic (storeID=25), до 300 игр
+function buildDealsUrl(pageNum){
+  var ids=STORE_IDS[dStore]||STORE_IDS.all;
   var sm={savings:'8',price:'3',title:'2',rating:'7'};
-  var url='https://www.cheapshark.com/api/1.0/deals?pageSize=60&pageNumber=0&onSale=1';
-  if(dFl!=='all')url+='&storeID='+dFl;
+  var url='https://www.cheapshark.com/api/1.0/deals?pageSize=60&pageNumber='+pageNum+'&onSale=1&storeID='+ids;
   if(dPr<60)url+='&upperPrice='+dPr;
   url+='&sortBy='+(sm[dSo]||'8');
-
-  return Promise.all([pFetch(url),pFetch(url.replace('pageNumber=0','pageNumber=1'))]).then(function(res){
-    var d1=Array.isArray(res[0])?res[0]:[],d2=Array.isArray(res[1])?res[1]:[];
-    var raw=d1.concat(d2),seenD={};
-
+  return url;
+}
+function mapDeal(d){
+  return{
+    id:'cs-'+d.dealID,
+    title:d.title||'',
+    thumb:d.thumb||'',
+    sale:parseFloat(d.salePrice)||0,
+    normal:parseFloat(d.normalPrice)||0,
+    pct:Math.round(parseFloat(d.savings)||0),
+    rating:parseFloat(d.steamRatingPercent)||0,
+    ratingText:d.steamRatingText||'',
+    reviews:parseInt(d.steamRatingCount)||0,
+    storeID:d.storeID,
+    storeName:STORE_NAMES[d.storeID]||CSN[d.storeID]||'Store',
+    meta:parseInt(d.metacriticScore)||0,
+    url:'https://www.cheapshark.com/redirect?dealID='+d.dealID
+  }
+}
+// Загружает первые 5 страниц параллельно = до 300 игр
+function fetchDeals(){
+  var pages=[0,1,2,3,4];
+  var promises=pages.map(function(p){return pFetch(buildDealsUrl(p)).catch(function(){return[]})});
+  return Promise.all(promises).then(function(results){
+    var seenD={},raw=[];
+    results.forEach(function(r){if(Array.isArray(r))raw=raw.concat(r)});
     DG=raw.filter(function(d){
       var sv=parseFloat(d.savings)||0,sp=parseFloat(d.salePrice)||0;
       if(sv<dMn||sv>dMx)return false;
@@ -740,26 +785,44 @@ function fetchDeals(){
       if(seenD[k])return false;
       seenD[k]=true;
       return true
-    }).map(function(d){
-      return{
-        id:'cs-'+d.dealID,
-        title:d.title||'',
-        thumb:d.thumb||'',
-        sale:parseFloat(d.salePrice)||0,
-        normal:parseFloat(d.normalPrice)||0,
-        pct:Math.round(parseFloat(d.savings)||0),
-        rating:parseFloat(d.steamRatingPercent)||0,
-        ratingText:d.steamRatingText||'',
-        reviews:parseInt(d.steamRatingCount)||0,
-        storeID:d.storeID,
-        storeName:CSN[d.storeID]||'Store',
-        meta:parseInt(d.metacriticScore)||0,
-        url:'https://www.cheapshark.com/redirect?dealID='+d.dealID
-      }
-    });
-
+    }).map(mapDeal);
+    dLoadedPages=5;
     setCount($('navD'),DG.length);
     return DG
+  })
+}
+// Загружает ещё 2 страницы по кнопке
+function fetchDealsMore(){
+  var btn=$('dLM');
+  btn.disabled=true;btn.textContent='⏳ Загружаем...';
+  var pages=[dLoadedPages,dLoadedPages+1];
+  var promises=pages.map(function(p){return pFetch(buildDealsUrl(p)).catch(function(){return[]})});
+  Promise.all(promises).then(function(results){
+    var seenD={};
+    DG.forEach(function(d){seenD[(d.title||'').toLowerCase()+d.storeID]=true});
+    var added=0;
+    results.forEach(function(r){
+      if(!Array.isArray(r))return;
+      r.forEach(function(d){
+        var sv=parseFloat(d.savings)||0,sp=parseFloat(d.salePrice)||0;
+        if(sv<dMn||sv>dMx)return;
+        if(dPr<60&&sp>dPr)return;
+        if(sp<=0)return;
+        var k=(d.title||'').toLowerCase()+d.storeID;
+        if(seenD[k])return;
+        seenD[k]=true;
+        DG.push(mapDeal(d));
+        added++;
+      })
+    });
+    dLoadedPages+=2;
+    btn.disabled=false;btn.textContent='🎮 Загрузить ещё 60 игр';
+    setCount($('navD'),DG.length);
+    if(added===0){$('dLMW').style.display='none';toast('Все игры загружены','info')}
+    else{toast('➕ +'+added+' игр загружено','ok');dPg=0;renD()}
+  }).catch(function(){
+    btn.disabled=false;btn.textContent='🎮 Загрузить ещё 60 игр';
+    toast('❌ Ошибка загрузки','err')
   })
 }
 function dCard(d,i){
@@ -807,6 +870,7 @@ function renD(){
 
   if(pg.length)$('dO').innerHTML='<div class="games-grid">'+pg.map(dCard).join('')+'</div>';
   else $('dO').innerHTML='<div class="empty">🔍 Скидок не найдено</div>';
+  $('dLMW').style.display=DG.length>0?'flex':'none';
 
   if(list.length>DPP){
     var ph='';
@@ -859,8 +923,9 @@ function loadD(force){
 
   if(!force&&dLoaded){renD();showSB('hide');return}
 
+  var cacheKey='gv_d3_'+dStore+'_'+dMn+'_'+dMx+'_'+dPr+'_'+dSo;
   if(!force){
-    var c=cGet('gv_d');
+    var c=cGet(cacheKey);
     if(c&&c.length){
       DG=c;
       $('navD').textContent=c.length;
@@ -873,7 +938,7 @@ function loadD(force){
 
   $('dO').innerHTML=skel(6);
   fetchDeals().then(function(){
-    cSet('gv_d',DG);
+    cSet(cacheKey,DG);
     showSB('live','✅ LIVE');
     toast('🏷️ '+DG.length+' скидок','ok');
     dLoaded=true;renD()
@@ -885,9 +950,10 @@ function loadD(force){
   })
 }
 function primeDealsCount(){
-  var c=cGet('gv_d');
+  var cacheKey='gv_d3_'+dStore+'_'+dMn+'_'+dMx+'_'+dPr+'_'+dSo;
+  var c=cGet(cacheKey);
   if(c&&c.length){DG=c;setCount($('navD'),c.length);dLoaded=true}
-  fetchDeals().then(function(){cSet('gv_d',DG);dLoaded=true}).catch(function(){if(c&&c.length){DG=c;setCount($('navD'),c.length);dLoaded=true}})
+  fetchDeals().then(function(){cSet(cacheKey,DG);dLoaded=true}).catch(function(){if(c&&c.length){DG=c;setCount($('navD'),c.length);dLoaded=true}})
 }
 function switchS(s){
   sec=s;
@@ -921,6 +987,21 @@ document.addEventListener('click',function(e){
   }
 
   var n=e.target.closest('[data-nav]');if(n){switchS(n.getAttribute('data-nav'));return}
+  var sp=e.target.closest('[data-store]');
+  if(sp){
+    dStore=sp.getAttribute('data-store');
+    savePr();
+    document.querySelectorAll('.store-pill').forEach(function(b){
+      b.className='store-pill';
+      if(b.getAttribute('data-store')===dStore){
+        if(dStore==='all')b.classList.add('on-all');
+        else if(dStore==='steam')b.classList.add('on-steam');
+        else b.classList.add('on-epic');
+      }
+    });
+    dPg=0;dLoaded=false;loadD(true);
+    return;
+  }
   var ff=e.target.closest('[data-ff]');if(ff){fFl=ff.getAttribute('data-ff');renF();return}
   var fs=e.target.closest('[data-fs]');if(fs){fSo=fs.getAttribute('data-fs');savePr();renF();return}
   var ft=e.target.closest('[data-ft]');if(ft){fTab=ft.getAttribute('data-ft');fFl='all';document.querySelectorAll('.stab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ft')===fTab)});renF();return}
@@ -979,10 +1060,14 @@ $('bClr').addEventListener('click',function(){
   }
 });
 
+$('dLM').addEventListener('click',fetchDealsMore);
+
 window.addEventListener('scroll',function(){$('scrollBtn').classList.toggle('visible',window.scrollY>400)});
 $('scrollBtn').addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
 
 loadTk();loadPr();loadSeen();apTh();
+// Восстанавливаем активную таблетку магазина после loadPr
+(function(){document.querySelectorAll('.store-pill').forEach(function(b){b.className='store-pill';if(b.getAttribute('data-store')===dStore){if(dStore==='all')b.classList.add('on-all');else if(dStore==='steam')b.classList.add('on-steam');else b.classList.add('on-epic')}})})();
 $('rMn').value=dMn;$('rvMn').textContent=dMn+'%';
 $('rMx').value=dMx;$('rvMx').textContent=dMx+'%';
 $('rPr').value=dPr;$('rvPr').textContent=dPr>=60?'Любая':'$'+dPr;
