@@ -1,21 +1,38 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "FreeGamer — платные игры бесплатно",
+  "short_name": "FreeGamer",
+  "description": "Актуальные раздачи платных игр: забирай бесплатно и навсегда.",
+  "lang": "ru",
+  "start_url": "/free-games/",
+  "scope": "/free-games/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0a0c14",
+  "background_color": "#0a0c14",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png",
+      "src": "/free-games/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/free-games/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/web-app-manifest-512x512.png",
+      "src": "/free-games/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/free-games/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#575aae",
-  "display": "standalone"
+  ]
 }
