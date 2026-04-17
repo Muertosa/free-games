@@ -12,8 +12,8 @@
 
 <!-- Favicon -->
 <link rel="icon" href="/free-games/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/free-games/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/free-games/favicon-16x16.png">
+<link rel="icon" type="image/svg+xml" href="/free-games/favicon.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="/free-games/favicon-96x96.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/free-games/apple-touch-icon.png">
 <link rel="manifest" href="/free-games/site.webmanifest">
 
@@ -32,11 +32,17 @@
 <meta property="og:description" content="Раздачи платных игр: успей забрать бесплатно и оставить навсегда. Epic Games, Steam и другие сервисы.">
 <meta property="og:url" content="https://muertosa.github.io/free-games/">
 <meta property="og:site_name" content="FreeGamer">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image" content="https://muertosa.github.io/free-games/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="FreeGamer — платные игры бесплатно">
 
 <!-- Twitter -->
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Платные игры бесплатно — актуальные раздачи | FreeGamer🎮">
 <meta name="twitter:description" content="Раздачи платных игр: забирай бесплатно и навсегда.">
+<meta name="twitter:image" content="https://muertosa.github.io/free-games/og.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,7 +73,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;paddi
 .container{max-width:1360px;margin:0 auto}
 .header{text-align:center;margin-bottom:28px}
 .logo-row{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:6px}
-.logo{font-family:'Unbounded',sans-serif;font-size:clamp(26px,5vw,48px);font-weight:900;background:linear-gradient(135deg,#7c3aed,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h1.logo{font-family:'Unbounded',sans-serif;font-size:clamp(26px,5vw,48px);font-weight:900;line-height:1.1;margin:0;background:linear-gradient(135deg,#7c3aed,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .logo-pad{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(124,58,237,.22),rgba(96,165,250,.14));border:1px solid var(--border);box-shadow:0 10px 34px rgba(124,58,237,.12);position:relative}
 .logo-pad::after{content:"";position:absolute;inset:-18px;border-radius:22px;background:radial-gradient(circle,rgba(124,58,237,.22),transparent 65%);filter:blur(10px);opacity:.7;pointer-events:none}
 .logo-pad span{font-size:28px;line-height:1;filter:drop-shadow(0 8px 18px rgba(124,58,237,.25))}
@@ -233,13 +239,13 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
 </head>
 
 <body>
-<button class="theme-toggle" id="themeBtn" title="Тема">🌙</button>
-<button class="scroll-top" id="scrollBtn" title="Наверх">↑</button>
+<button class="theme-toggle" id="themeBtn" title="Тема" aria-label="Переключить тему">🌙</button>
+<button class="scroll-top" id="scrollBtn" title="Наверх" aria-label="Наверх">↑</button>
 
 <div class="container">
   <div class="header">
     <div class="logo-row">
-      <div class="logo">FreeGamer</div>
+      <h1 class="logo">FreeGamer</h1>
       <div class="logo-pad" aria-hidden="true"><span>🎮</span></div>
     </div>
     <p class="subtitle">Платные игры, которые временно отдают бесплатно. И предложения, на которые стоит обратить внимание.</p>
@@ -269,7 +275,6 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
     <div class="sub-tabs">
       <button class="stab on" data-ft="active">Активные (<span id="cA">0</span>)</button>
       <button class="stab" data-ft="taken">Забрано (<span id="cT">0</span>)</button>
-      <button class="stab" data-ft="expired">Истёкшие (<span id="cE">0</span>)</button>
     </div>
 
     <div class="tiny-row">
@@ -343,15 +348,15 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
 
   <div class="src">
     Данные:
-    <a href="https://www.gamerpower.com" target="_blank" rel="noopener">GamerPower</a> ·
-    <a href="https://store.epicgames.com/ru/free-games" target="_blank" rel="noopener">Epic Games</a> ·
-    <a href="https://www.cheapshark.com" target="_blank" rel="noopener">CheapShark</a>
+    <a href="https://www.gamerpower.com" target="_blank" rel="noopener noreferrer">GamerPower</a> ·
+    <a href="https://store.epicgames.com/ru/free-games" target="_blank" rel="noopener noreferrer">Epic Games</a> ·
+    <a href="https://www.cheapshark.com" target="_blank" rel="noopener noreferrer">CheapShark</a>
     <br>
     Сайт не раздаёт игры и не хранит ключи. Все ссылки ведут на официальные магазины/страницы акций.
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileIn" accept=".json" style="display:none">
 
 <script>
@@ -617,7 +622,15 @@ function togTk(id){
     toast('Убрано','info')
   }else{
     var g=FG.find(function(x){return x.id===id});
-    taken[id]={ts:Date.now(),w:g?g.worth:0};
+    taken[id]={
+      ts:Date.now(),
+      w:g?g.worth:0,
+      title:g?g.title:((seen[id]&&seen[id].title)||''),
+      desc:g?g.desc:'',
+      img:g?g.img:'',
+      url:g?g.url:'#',
+      store:g?g.store:'other'
+    };
     toast('✓ Забрано!','ok')
   }
   if(btn){btn.classList.add('pop');setTimeout(function(){btn.classList.remove('pop')},400)}
@@ -641,7 +654,6 @@ function updC(){
   var a=FG.filter(function(g){return!isX(g)});
   $('cA').textContent=a.length;
   $('cT').textContent=Object.keys(taken).length;
-  $('cE').textContent=FG.filter(function(g){return isX(g)}).length;
   setCount($('navF'),a.length)
 }
 function cdF(end){
@@ -693,20 +705,41 @@ function fCard(g,i){
     +'<div class="gc-body"><div class="gc-head"><h3 class="gc-title">'+esc(g.title)+'</h3><div class="gc-badges">'+b+'</div></div>'
     +'<div class="gc-desc-wrap"><p class="gc-desc">'+esc(desc)+'</p>'+(desc&&desc.length>140?'<button class="desc-toggle" type="button" data-desc="'+g.id+'"><span class="txt">Подробнее</span><span class="arr">▾</span></button>':'')+'</div>'
     +cdH
-    +'<div class="gc-foot"><div class="p-free">Бесплатно</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener" class="gc-link'+(xp?' dis':'')+'">'+(xp?'Закончилась':'Забрать →')+'</a></div>'
+    +'<div class="gc-foot"><div class="p-free">Бесплатно</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer" class="gc-link'+(xp?' dis':'')+'">'+(xp?'Закончилась':'Забрать →')+'</a></div>'
     +'</div></div>'
+}
+
+function takenToGame(id){
+  var g=FG.find(function(x){return x.id===id});
+  if(g)return g;
+  var t=taken[id]||{};
+  var title=t.title||(seen[id]&&seen[id].title)||('Игра #'+id);
+  return nrm({
+    id:id,
+    title:title,
+    desc:t.desc||'',
+    img:t.img||'',
+    url:t.url||'#',
+    store:t.store||'other',
+    worth:+t.w||0,
+    ts:t.ts||0,
+    _rs:'Taken'
+  });
 }
 
 function renF(){
   var q=($('fS').value||'').toLowerCase();
-  var act=FG.filter(function(g){return!isX(g)}),exp=FG.filter(function(g){return isX(g)});
+  var act=FG.filter(function(g){return!isX(g)});
   var list;
 
-  if(fTab==='taken')list=FG.filter(function(g){return isTk(g.id)});
-  else if(fTab==='expired')list=exp;
-  else{list=act.slice();if($('hT').checked)list=list.filter(function(g){return!isTk(g.id)})}
+  if(fTab==='taken'){
+    list=Object.keys(taken).map(takenToGame);
+  }else{
+    list=act.slice();
+    if($('hT').checked)list=list.filter(function(g){return!isTk(g.id)})
+  }
 
-  if(q)list=list.filter(function(g){return g.title.toLowerCase().indexOf(q)>=0||g.desc.toLowerCase().indexOf(q)>=0});
+  if(q)list=list.filter(function(g){return g.title.toLowerCase().indexOf(q)>=0||(g.desc||'').toLowerCase().indexOf(q)>=0});
   if(fFl!=='all')list=list.filter(function(g){return g.store===fFl});
 
   var c=list.slice();
@@ -716,7 +749,7 @@ function renF(){
   else c.sort(function(a,b){if(a.hot!==b.hot)return a.hot?-1:1;return(b.worth||0)-(a.worth||0)});
   list=c;
 
-  var src=fTab==='expired'?exp:act,stores=[];
+  var src=fTab==='taken'?list:act,stores=[];
   src.forEach(function(g){if(stores.indexOf(g.store)<0)stores.push(g.store)});
   var fh='<button class="fbtn'+(fFl==='all'?' on':'')+'" data-ff="all">Все</button>';
   stores.forEach(function(s){fh+='<button class="fbtn'+(fFl===s?' on':'')+'" data-ff="'+s+'">'+s.toUpperCase()+'</button>'});
@@ -738,7 +771,7 @@ function renF(){
 
   if(list.length)$('fO').innerHTML='<div class="games-grid">'+list.map(fCard).join('')+'</div>';
   else{
-    var m=fTab==='taken'?'📋 Отметьте игры кнопкой ＋':fTab==='expired'?'📦 Нет истёкших':'🔍 Ничего не найдено';
+    var m=fTab==='taken'?'📋 Отметьте игры кнопкой ＋':'🔍 Ничего не найдено';
     $('fO').innerHTML='<div class="empty">'+m+'</div>'
   }
 }
@@ -752,11 +785,19 @@ function buildDealsUrl(pageNum){
   url+='&sortBy='+(sm[dSo]||'8');
   return url;
 }
+function upgradeThumb(u){
+  // CheapShark отдаёт маленькую капсулу — меняем на нормальную Steam header.jpg
+  var s=String(u||'');
+  if(!s)return '';
+  s=s.replace('capsule_sm_120.jpg','header.jpg');
+  s=s.replace('capsule_184x69.jpg','header.jpg');
+  return s;
+}
 function mapDeal(d){
   return{
     id:'cs-'+d.dealID,
     title:d.title||'',
-    thumb:d.thumb||'',
+    thumb:upgradeThumb(d.thumb),
     sale:parseFloat(d.salePrice)||0,
     normal:parseFloat(d.normalPrice)||0,
     pct:Math.round(parseFloat(d.savings)||0),
@@ -842,7 +883,7 @@ function dCard(d,i){
     +imgH
     +'<div class="gc-body"><div class="gc-head"><h3 class="gc-title">'+esc(d.title)+'</h3><div class="gc-badges">'+b+'</div></div>'
     +'<p class="gc-desc">'+esc(desc)+'</p>'
-    +'<div class="gc-foot"><div class="price-block"><span class="price-old">$'+d.normal.toFixed(2)+'</span><span class="price-new">$'+d.sale.toFixed(2)+'</span></div><a href="'+esc(d.url)+'" target="_blank" rel="noopener" class="gc-link">Купить →</a></div>'
+    +'<div class="gc-foot"><div class="price-block"><span class="price-old">$'+d.normal.toFixed(2)+'</span><span class="price-new">$'+d.sale.toFixed(2)+'</span></div><a href="'+esc(d.url)+'" target="_blank" rel="noopener noreferrer" class="gc-link">Купить →</a></div>'
     +'</div></div>'
 }
 function renD(){
@@ -943,17 +984,27 @@ function loadD(force){
     toast('🏷️ '+DG.length+' скидок','ok');
     dLoaded=true;renD()
   }).catch(function(){
+    setCount($('navD'),DG.length||0);
     if(!DG.length){
       showSB('err','❌ Ошибка');
-      $('dO').innerHTML='<div class="empty">⚠️ Не удалось загрузить. Попробуйте обновить.</div>'
+      $('dO').innerHTML='<div class="empty">⚠️ Не удалось загрузить. <button class="tool-btn" onclick="_RDL()">🔄 Повторить</button></div>'
     }
   })
 }
-function primeDealsCount(){
-  var cacheKey='gv_d3_'+dStore+'_'+dMn+'_'+dMx+'_'+dPr+'_'+dSo;
-  var c=cGet(cacheKey);
-  if(c&&c.length){DG=c;setCount($('navD'),c.length);dLoaded=true}
-  fetchDeals().then(function(){cSet(cacheKey,DG);dLoaded=true}).catch(function(){if(c&&c.length){DG=c;setCount($('navD'),c.length);dLoaded=true}})
+window._RDL=function(){dLoaded=false;loadD(true)};
+
+// Лёгкая инициализация счётчика «Скидки» из любого кэша, без сетевых запросов.
+function initDealsBadge(){
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('gv_d3_')===0){
+        var v=JSON.parse(localStorage.getItem(k));
+        if(v&&v.d&&v.d.length){setCount($('navD'),v.d.length);return}
+      }
+    }
+  }catch(e){}
+  setCount($('navD'),'—');
 }
 function switchS(s){
   sec=s;
@@ -1066,6 +1117,18 @@ window.addEventListener('scroll',function(){$('scrollBtn').classList.toggle('vis
 $('scrollBtn').addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
 
 loadTk();loadPr();loadSeen();apTh();
+
+// Одноразовая миграция старых записей taken: подтягиваем title/img из seen
+(function migrateTaken(){
+  var changed=false;
+  Object.keys(taken).forEach(function(id){
+    var t=taken[id];
+    if(t&&!t.title&&seen[id]&&seen[id].title){t.title=seen[id].title;changed=true}
+    if(t&&!t.w&&seen[id]&&seen[id].w){t.w=seen[id].w;changed=true}
+  });
+  if(changed)saveTk();
+})();
+
 // Восстанавливаем активную таблетку магазина после loadPr
 (function(){document.querySelectorAll('.store-pill').forEach(function(b){b.className='store-pill';if(b.getAttribute('data-store')===dStore){if(dStore==='all')b.classList.add('on-all');else if(dStore==='steam')b.classList.add('on-steam');else b.classList.add('on-epic')}})})();
 $('rMn').value=dMn;$('rvMn').textContent=dMn+'%';
@@ -1075,9 +1138,8 @@ $('rPr').value=dPr;$('rvPr').textContent=dPr>=60?'Любая':'$'+dPr;
 $('upTime').textContent=new Date().toLocaleString('ru-RU');
 $('fO').innerHTML=skel(6);
 setCountLoading($('navF'));
-setCountLoading($('navD'));
+initDealsBadge();
 loadF(false);
-primeDealsCount();
 setInterval(updTm,1000);
 })();
 </script>
