@@ -697,6 +697,33 @@ function searchSteamId(title){
     cSet(key,'');return null;
   }).catch(function(){return null})
 }
+/* Поиск AppID через CheapShark — основной путь: быстрее и стабильнее, чем Steam напрямую */
+function searchSteamIdViaCheapShark(title){
+  var nt=normT(title);
+  if(!nt||nt.length<3)return Promise.resolve(null);
+  var key='gv_cs_sai_'+nt;
+  var c=cGet(key,RATING_TTL);
+  if(c!==null&&c!==undefined)return Promise.resolve(c||null);
+  var u='https://www.cheapshark.com/api/1.0/games?title='+encodeURIComponent(title)+'&limit=5';
+  return pFetch(u).then(function(r){
+    if(!Array.isArray(r)||!r.length){cSet(key,'');return null}
+    // 1) точное совпадение по названию + есть AppID
+    for(var i=0;i<r.length;i++){
+      if(normT(r[i].external)===nt&&r[i].steamAppID){
+        cSet(key,String(r[i].steamAppID));
+        return String(r[i].steamAppID);
+      }
+    }
+    // 2) частичное вхождение + есть AppID (для "Game: Subtitle")
+    for(var j=0;j<r.length;j++){
+      if(r[j].steamAppID&&(normT(r[j].external).indexOf(nt)>=0||nt.indexOf(normT(r[j].external))>=0)){
+        cSet(key,String(r[j].steamAppID));
+        return String(r[j].steamAppID);
+      }
+    }
+    cSet(key,'');return null;
+  }).catch(function(){return null})
+}
 function fetchSteamMeta(appid){
   if(!appid)return Promise.resolve(null);
   var key='gv_meta_'+appid;
@@ -724,17 +751,27 @@ function fetchSteamMeta(appid){
     return null;
   })
 }
-/* Параллельное обогащение с лимитом 4 одновременных запроса */
+/* Параллельное обогащение с лимитом 4 одновременных запроса.
+   Пути поиска AppID: 1) URL  2) CheapShark  3) Steam storesearch
+   После каждого батча — прогрессивный re-render, чтобы оценки появлялись по мере подгрузки. */
 function enrichRatings(games){
+  if(!games||!games.length)return Promise.resolve(games);
   var i=0;
+  function resolveAppId(g){
+    var fromUrl=extractSteamAppId(g.url);
+    if(fromUrl)return Promise.resolve(fromUrl);
+    return searchSteamIdViaCheapShark(g.title).then(function(id){
+      if(id)return id;
+      return searchSteamId(g.title);
+    });
+  }
   function next(){
     if(i>=games.length)return Promise.resolve();
     var batch=[];
     for(var b=0;b<4&&i<games.length;b++,i++){
       batch.push((function(g){
-        var appid=extractSteamAppId(g.url);
-        var p=appid?Promise.resolve(appid):searchSteamId(g.title);
-        return p.then(function(id){
+        if(g.metacritic||g.posPct)return Promise.resolve(); // уже обогащено
+        return resolveAppId(g).then(function(id){
           if(!id)return;
           g.appid=id;
           return fetchSteamMeta(id).then(function(m){
@@ -747,7 +784,11 @@ function enrichRatings(games){
         }).catch(function(){});
       })(games[i]));
     }
-    return Promise.all(batch).then(next);
+    return Promise.all(batch).then(function(){
+      // Прогрессивный рендер активной free-секции
+      try{if(sec==='free')renF()}catch(e){}
+      return next();
+    });
   }
   return next().then(function(){return games});
 }
@@ -1116,13 +1157,21 @@ function renD(){
 function loadF(force){
   showSB('load','⏳ загрузка...');
   setCountLoading($('navF'));
-  // 1) Мгновенный показ из кэша, если есть
+  // 1) Мгновенный показ из кэша + догон оценок для тех, у кого их нет
   if(!force){
     var c=cGet('gv_f');
     if(c&&c.length){
       FG=c.map(nrm);
       showSB('cache','📦 кэш');
-      updC();renF()
+      updC();renF();
+      // Даже если кэш свежий — догоняем оценки (старый кэш мог быть без них)
+      var missing=FG.filter(function(g){return !g.metacritic && !g.posPct});
+      if(missing.length){
+        enrichRatings(missing).then(function(){
+          cSet('gv_f',FG);
+          renF();
+        });
+      }
     }
   }
   // 2) Параллельный запрос ко всем источникам
@@ -1146,7 +1195,7 @@ function loadF(force){
         toast('✅ '+FG.length+' бесплатных игр'+srcInfo,'ok');
         $('upTime').textContent=new Date().toLocaleString('ru-RU');
         updC();renF();
-        // 3) Фоновое обогащение оценками Steam
+        // 3) Фоновое обогащение оценками (CheapShark → Steam fallback)
         enrichRatings(FG).then(function(){
           cSet('gv_f',FG);
           renF();
