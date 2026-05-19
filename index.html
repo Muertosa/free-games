@@ -151,6 +151,29 @@ body.light .gc{box-shadow:0 2px 10px rgba(0,0,0,0.05)}
 .b-expired{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2)}
 .b-ending{background:rgba(251,146,60,0.12);color:#fb923c;border:1px solid rgba(251,146,60,0.2);animation:pulse 1.5s infinite}
 .b-deal{background:rgba(124,58,237,0.12);color:var(--accent2);border:1px solid rgba(124,58,237,0.2)}
+/* ===== HERO: топ-раздача наверху ===== */
+.hero{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:24px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);min-height:300px;position:relative;box-shadow:0 10px 40px rgba(124,58,237,0.12);animation:fadeUp .4s ease-out}
+.hero-img-wrap{position:relative;overflow:hidden;background:#0a0c14}
+.hero-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-img-wrap::after{content:"";position:absolute;inset:0;background:linear-gradient(to right,transparent 45%,var(--card) 100%);pointer-events:none}
+.hero-body{padding:32px;display:flex;flex-direction:column;justify-content:center;gap:13px;min-width:0}
+.hero-eyebrow{font-size:11px;font-weight:800;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;display:inline-flex;align-items:center;gap:6px}
+.hero-title{font-family:'Unbounded',sans-serif;font-size:clamp(20px,2.6vw,30px);font-weight:900;line-height:1.15;color:var(--text);margin:0;word-break:break-word}
+.hero-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hero-cd{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.22);border-radius:10px;color:#f87171;font-size:12px;font-weight:700;align-self:flex-start}
+.hero-cd.cde{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.25);color:#fb923c}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.hero-cta{padding:13px 28px;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;text-decoration:none;border-radius:11px;font-weight:800;font-size:14px;display:inline-flex;align-items:center;gap:6px;transition:all .25s;box-shadow:0 6px 24px rgba(124,58,237,0.35);border:none;cursor:pointer;font-family:inherit}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(124,58,237,0.5)}
+.hero-take{padding:13px 18px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text2);border-radius:11px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s}
+.hero-take:hover{background:rgba(255,255,255,0.1);color:var(--text)}
+.hero-take.on{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.3);color:#4ade80}
+@media(max-width:760px){
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-img-wrap{aspect-ratio:16/9}
+  .hero-img-wrap::after{background:linear-gradient(to bottom,transparent 50%,var(--card) 100%)}
+  .hero-body{padding:20px}
+}
 /* ===== Блок оценок (Metacritic + Steam %) ===== */
 .gc-ratings{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .rt{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;font-size:11px;font-weight:800;border:1px solid var(--border);background:rgba(255,255,255,0.03);line-height:1}
@@ -276,11 +299,13 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
     </div>
     <div class="toolbar">
       <button class="tool-btn" id="bRef">🔄 Обновить</button>
+      <button class="tool-btn" id="bSnd" title="Звук уведомлений о новых раздачах">🔔 Звук</button>
       <button class="tool-btn" id="bExp">📤 Экспорт</button>
       <button class="tool-btn" id="bImp">📥 Импорт</button>
       <button class="tool-btn" id="bClr">🗑️ Очистить</button>
     </div>
     <div class="stats" id="fSt"></div>
+    <div id="heroBox"></div>
     <div id="fO"></div>
   </div>
   <div id="secD" style="display:none">
@@ -370,6 +395,9 @@ var dFl='all',dSo='savings',dMn=50,dMx=100,dPr=60,dPg=0,DPP=30;
 var taken={},theme='dark',dLoaded=false;
 var dStore='all',dLoadedPages=0;
 var seen={};
+// Звуковые уведомления:
+var audioCtx=null, audioUnlocked=false, soundMuted=false;
+var notifiedIds={}, firstCheck=true;
 
 /* ============================================================
    3. УТИЛИТЫ (DOM, форматирование, тосты)
@@ -892,6 +920,124 @@ function isEn(g){if(!g.end)return false;var d=new Date(g.end).getTime()-Date.now
 function isNw(g){return g.ts&&Date.now()-g.ts<48*36e5}
 
 /* ============================================================
+   16.5. ЗВУК + УВЕДОМЛЕНИЯ О НОВЫХ ИГРАХ
+   ============================================================ */
+function loadSound(){
+  try{notifiedIds=JSON.parse(localStorage.getItem('gv_notified')||'{}')}catch(e){notifiedIds={}}
+  try{soundMuted=localStorage.getItem('gv_muted')==='1'}catch(e){}
+  // Если хранилище пустое — это первый запуск, в этом случае звук не играем (иначе спам)
+  firstCheck=!Object.keys(notifiedIds).filter(function(k){return k!=='__seen'}).length;
+}
+function saveNotified(){try{localStorage.setItem('gv_notified',JSON.stringify(notifiedIds))}catch(e){}}
+function saveMuted(){try{localStorage.setItem('gv_muted',soundMuted?'1':'0')}catch(e){}}
+// Любое взаимодействие пользователя разблокирует автоплей аудио
+function unlockAudio(){
+  if(audioUnlocked)return;
+  audioUnlocked=true;
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(AC){audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume()}
+  }catch(e){}
+}
+// Мягкий двухтонный звон (C5 → E5) через Web Audio, без внешних файлов
+function playChime(){
+  if(soundMuted||!audioCtx)return;
+  try{
+    var now=audioCtx.currentTime;
+    [523.25,659.25].forEach(function(freq,i){
+      var osc=audioCtx.createOscillator();
+      var gain=audioCtx.createGain();
+      osc.type='sine';
+      osc.frequency.value=freq;
+      var t=now+i*0.13;
+      gain.gain.setValueAtTime(0,t);
+      gain.gain.linearRampToValueAtTime(0.14,t+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001,t+0.4);
+      osc.connect(gain);gain.connect(audioCtx.destination);
+      osc.start(t);osc.stop(t+0.5);
+    });
+  }catch(e){}
+}
+// Проверка появления новых раздач, звук + тост — только один раз на новый ID
+function checkNewGames(){
+  var active=FG.filter(function(g){return!isX(g)&&g.id});
+  var fresh=[];
+  active.forEach(function(g){if(!notifiedIds[g.id])fresh.push(g)});
+  active.forEach(function(g){notifiedIds[g.id]=Date.now()});
+  // Чистим старые записи (>30 дней)
+  var cutoff=Date.now()-30*864e5;
+  Object.keys(notifiedIds).forEach(function(id){
+    if(typeof notifiedIds[id]==='number'&&notifiedIds[id]<cutoff)delete notifiedIds[id];
+  });
+  saveNotified();
+  if(firstCheck){firstCheck=false;return} // первый запуск — без звука
+  if(fresh.length>0){
+    playChime();
+    var msg=fresh.length===1
+      ? '🆕 Новая раздача: '+(fresh[0].title||'').slice(0,40)
+      : '🆕 Новых раздач: '+fresh.length;
+    toast(msg,'ok');
+  }
+}
+function updSoundBtn(){
+  var b=$('bSnd');if(!b)return;
+  b.textContent=soundMuted?'🔕 Звук':'🔔 Звук';
+}
+
+/* ============================================================
+   16.6. HERO-БЛОК (топ-раздача наверху)
+   ============================================================ */
+function renderHero(activeList){
+  var box=$('heroBox');
+  if(!box)return;
+  // Не показываем в "забрано", с активным фильтром по магазину или при поиске
+  if(fTab==='taken'||fFl!=='all'){box.innerHTML='';return}
+  var q=($('fS')&&$('fS').value||'').trim();
+  if(q){box.innerHTML='';return}
+  // Кандидаты: активные, не забранные, с названием
+  var cand=activeList.filter(function(g){return!isTk(g.id)&&!isX(g)&&g.title});
+  if(!cand.length){box.innerHTML='';return}
+  // HOT первыми, потом по ценности, в равных случаях — с оценкой выше
+  cand.sort(function(a,b){
+    if(a.hot!==b.hot)return a.hot?-1:1;
+    var dw=(b.worth||0)-(a.worth||0);
+    if(dw!==0)return dw;
+    return ((b.metacritic||0)+(b.posPct||0))-((a.metacritic||0)+(a.posPct||0));
+  });
+  var top=cand[0];
+  var c=cdF(top.end);
+  var gr={'epic':'#1a1a2e,#16213e','steam':'#1b2838,#2a475e','gog':'#1a0a2e,#2d1b69','itchio':'#2e1a1a,#691b1b'}[top.store]||'#1a1540,#2d1b69';
+  var imgHtml=top.img
+    ? '<img src="'+esc(top.img)+'" alt="'+esc(top.title)+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">'
+    : '<div style="width:100%;height:100%;background:linear-gradient(135deg,'+gr+');display:flex;align-items:center;justify-content:center;font-size:48px;opacity:.4">🎮</div>';
+  var badges='<span class="badge b-'+esc(top.store)+'">'+(top.store||'other').toUpperCase()+'</span>';
+  if(top.worth>0)badges+='<span class="badge b-val">$'+top.worth.toFixed(0)+'</span>';
+  if(top.hot)badges+='<span class="badge b-hot">🔥 HOT</span>';
+  if(isEn(top))badges+='<span class="badge b-ending">⚡ СКОРО</span>';
+  var cdHtml='';
+  if(c){
+    if(c.x)cdHtml='<div class="hero-cd cde">⏰ Раздача закончилась</div>';
+    else cdHtml='<div class="hero-cd'+(c.e?' cde':'')+'">⏰ Осталось: <strong data-end="'+top.end+'">'+c.t+'</strong></div>';
+  }
+  var tk=isTk(top.id);
+  box.innerHTML=
+    '<div class="hero">'
+      +'<div class="hero-img-wrap">'+imgHtml+'</div>'
+      +'<div class="hero-body">'
+        +'<div class="hero-eyebrow">⭐ Топ-раздача сейчас</div>'
+        +'<h2 class="hero-title">'+esc(top.title)+'</h2>'
+        +'<div class="hero-meta">'+badges+'</div>'
+        +ratingHtml(top)
+        +cdHtml
+        +'<div class="hero-actions">'
+          +'<a href="'+esc(top.url||'#')+'" target="_blank" rel="noopener noreferrer" class="hero-cta">Забрать бесплатно →</a>'
+          +'<button class="hero-take'+(tk?' on':'')+'" onclick="_T(\''+top.id+'\')">'+(tk?'✓ Забрано':'＋ Отметить')+'</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+}
+
+/* ============================================================
    17. РЕНДЕР: ОЦЕНКИ
    ============================================================ */
 function ratingHtml(g){
@@ -970,6 +1116,8 @@ function takenToGame(id){
 function renF(){
   var q=($('fS').value||'').toLowerCase();
   var act=FG.filter(function(g){return!isX(g)});
+  // Hero-блок — топ-раздача наверху
+  renderHero(act);
   var list;
   if(fTab==='taken'){
     list=Object.keys(taken).map(takenToGame);
@@ -1195,7 +1343,9 @@ function loadF(force){
         toast('✅ '+FG.length+' бесплатных игр'+srcInfo,'ok');
         $('upTime').textContent=new Date().toLocaleString('ru-RU');
         updC();renF();
-        // 3) Фоновое обогащение оценками (CheapShark → Steam fallback)
+        // 3) Звуковое уведомление при появлении новых ID
+        checkNewGames();
+        // 4) Фоновое обогащение оценками (CheapShark → Steam fallback)
         enrichRatings(FG).then(function(){
           cSet('gv_f',FG);
           renF();
@@ -1267,14 +1417,15 @@ function switchS(s){
   if(s==='deals')loadD(false);else showSB('hide')
 }
 function updTm(){
-  document.querySelectorAll('.cd-v[data-end]').forEach(function(el){
+  document.querySelectorAll('[data-end]').forEach(function(el){
     var c=cdF(el.getAttribute('data-end'));
-    if(c&&!c.x)el.textContent=c.t;
-    else if(c&&c.x){
-      el.textContent='Закончилась';
-      var p=el.closest('.cd');
-      if(p)p.className='cd cdx'
-    }
+    if(!c)return;
+    if(!c.x){el.textContent=c.t;return}
+    el.textContent='Закончилась';
+    var p=el.closest('.cd');
+    if(p){p.className='cd cdx';return}
+    var hp=el.closest('.hero-cd');
+    if(hp)hp.classList.add('cde');
   })
 }
 
@@ -1326,6 +1477,12 @@ $('rMn').addEventListener('change',function(){dPg=0;dLoaded=false;loadD(true)});
 $('rMx').addEventListener('change',function(){dPg=0;dLoaded=false;loadD(true)});
 $('rPr').addEventListener('change',function(){dPg=0;dLoaded=false;loadD(true)});
 $('bRef').addEventListener('click',function(){if(sec==='free')loadF(true);else{dLoaded=false;loadD(true)}});
+$('bSnd').addEventListener('click',function(){
+  unlockAudio();
+  soundMuted=!soundMuted;saveMuted();updSoundBtn();
+  toast(soundMuted?'🔕 Звук выключен':'🔔 Звук включён — попробую сейчас','info');
+  if(!soundMuted)setTimeout(playChime,150);
+});
 $('bExp').addEventListener('click',function(){
   var d={v:2,date:new Date().toISOString(),taken:taken};
   var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
@@ -1370,7 +1527,20 @@ $('scrollBtn').addEventListener('click',function(){window.scrollTo({top:0,behavi
 /* ============================================================
    24. ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
-loadTk();loadPr();loadSeen();apTh();
+loadTk();loadPr();loadSeen();loadSound();apTh();updSoundBtn();
+// Разблокировка автоплея аудио по первому взаимодействию пользователя
+(function(){
+  var handler=function(){
+    unlockAudio();
+    ['click','touchstart','keydown'].forEach(function(ev){document.removeEventListener(ev,handler,true)});
+  };
+  ['click','touchstart','keydown'].forEach(function(ev){document.addEventListener(ev,handler,true)});
+})();
+// Авто-обновление списка раздач раз в 10 минут (если вкладка активна)
+setInterval(function(){
+  if(document.hidden)return;
+  if(sec==='free')loadF(true);
+},10*60*1000);
 // Миграция старых записей taken: подтягиваем title/worth из seen
 (function migrateTaken(){
   var changed=false;
