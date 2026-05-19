@@ -144,6 +144,15 @@ body.light .gc{box-shadow:0 2px 10px rgba(0,0,0,0.05)}
 .b-gog{background:rgba(168,85,247,0.10);color:#c084fc;border:1px solid rgba(168,85,247,0.2)}
 .b-itchio{background:rgba(245,101,101,0.10);color:#fca5a5;border:1px solid rgba(245,101,101,0.2)}
 .b-other{background:rgba(148,163,184,0.10);color:#94a3b8;border:1px solid rgba(148,163,184,0.2)}
+.b-stove{background:rgba(251,191,36,0.10);color:#fde047;border:1px solid rgba(251,191,36,0.22)}
+.b-indiegala{background:rgba(168,85,247,0.10);color:#e9d5ff;border:1px solid rgba(168,85,247,0.22)}
+.b-humble{background:rgba(220,38,38,0.10);color:#fca5a5;border:1px solid rgba(220,38,38,0.22)}
+.b-fanatical{background:rgba(236,72,153,0.10);color:#fbcfe8;border:1px solid rgba(236,72,153,0.22)}
+.b-gmg{background:rgba(34,197,94,0.10);color:#86efac;border:1px solid rgba(34,197,94,0.22)}
+.b-prime{background:rgba(34,211,238,0.10);color:#a5f3fc;border:1px solid rgba(34,211,238,0.22)}
+.b-ubisoft{background:rgba(96,165,250,0.10);color:#bfdbfe;border:1px solid rgba(96,165,250,0.22)}
+.b-ea{background:rgba(239,68,68,0.10);color:#fca5a5;border:1px solid rgba(239,68,68,0.22)}
+.b-microsoft{background:rgba(14,165,233,0.10);color:#bae6fd;border:1px solid rgba(14,165,233,0.22)}
 .b-hot{background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.2)}
 .b-val{background:rgba(34,197,94,0.08);color:#4ade80;border:1px solid rgba(34,197,94,0.15)}
 .b-taken{background:rgba(34,197,94,0.14);color:#4ade80;border:1px solid rgba(34,197,94,0.25)}
@@ -474,17 +483,52 @@ function isReal(g){
 function normT(t){return(t||'').toLowerCase().replace(/[™®©]/g,'').replace(/[^a-zа-яё0-9]/g,'')}
 function canonTitle(t){
   var s=String(t||'').toLowerCase();
-  s=s.replace(/\b(key\s+giveaway|steam\s+key\s+giveaway|giveaway)\b/g,' ');
-  s=s.replace(/\b(epic\s+games|steam|gog|itch\.io|itchio|stove|humble\s*store|fanatical|greenmangaming|uplay|origin)\b/g,' ');
+  s=s.replace(/\b(key\s+giveaway|steam\s+key\s+giveaway|free\s+giveaway|giveaway|free)\b/g,' ');
+  s=s.replace(/\b(epic\s+games|epic|steam|gog|itch\.io|itchio|stove|indiegala|humble\s*store|humble|fanatical|greenmangaming|gmg|uplay|origin|ubisoft|prime\s*gaming|amazon)\b/g,' ');
   s=s.replace(/\(([^)]*)\)/g,function(m,inner){
     var i=inner.toLowerCase();
-    if(/epic|steam|gog|itch|stove|giveaway|key|store/.test(i))return ' ';
+    if(/epic|steam|gog|itch|stove|gala|giveaway|key|store|humble|fanatical|prime/.test(i))return ' ';
     return ' '+inner+' ';
   });
   s=s.replace(/[™®©]/g,'');
   s=s.replace(/[^a-zа-яё0-9]+/g,' ');
   s=s.replace(/\s+/g,' ').trim();
   return s;
+}
+// Чистая версия названия для отображения: убираем "Giveaway", но магазин в скобках оставляем
+function cleanDisplayTitle(t){
+  var s=String(t||'').trim();
+  // "(Steam Key Giveaway)" → "(Steam)" — оставляем сам магазин
+  s=s.replace(/\(\s*([^)]+?)\s+key\s+giveaway\s*\)/gi,function(m,store){
+    var st=String(store||'').trim();
+    return st?'('+st+')':'';
+  });
+  // Чисто "(Giveaway)"/"(Key Giveaway)"/"(Free Giveaway)" — убираем целиком
+  s=s.replace(/\s*\(\s*(?:free\s+|key\s+)?giveaway\s*\)\s*/gi,' ');
+  // Хвостовое " Giveaway" / "Key Giveaway" / "Free Giveaway"
+  s=s.replace(/\s+(?:free\s+|key\s+)?giveaway\s*$/i,'');
+  s=s.replace(/\s{2,}/g,' ').trim();
+  return s||String(t||'');
+}
+// Распознать магазин по тексту в скобках названия (для случаев, когда platforms='PC')
+function inferStoreFromTitle(t){
+  var m=String(t||'').match(/\(\s*([^)]+)\s*\)/);
+  if(!m)return '';
+  var i=m[1].toLowerCase();
+  if(i.indexOf('stove')>=0)return 'stove';
+  if(i.indexOf('indiegala')>=0)return 'indiegala';
+  if(i.indexOf('humble')>=0)return 'humble';
+  if(i.indexOf('fanatical')>=0)return 'fanatical';
+  if(i.indexOf('gmg')>=0||i.indexOf('greenmangaming')>=0||i.indexOf('green man')>=0)return 'gmg';
+  if(i.indexOf('gog')>=0)return 'gog';
+  if(i.indexOf('itch')>=0)return 'itchio';
+  if(i.indexOf('steam')>=0)return 'steam';
+  if(i.indexOf('epic')>=0)return 'epic';
+  if(i.indexOf('prime')>=0||i.indexOf('amazon')>=0||i.indexOf('luna')>=0)return 'prime';
+  if(i.indexOf('uplay')>=0||i.indexOf('ubisoft')>=0)return 'ubisoft';
+  if(i.indexOf('origin')>=0||i.indexOf('ea ')>=0||i.indexOf('ea app')>=0)return 'ea';
+  if(i.indexOf('microsoft')>=0||i.indexOf('xbox')>=0)return 'microsoft';
+  return '';
 }
 function inferStoreFromUrl(url){
   var u=String(url||'').toLowerCase();
@@ -599,7 +643,13 @@ function fetchGP(){
       return p.indexOf('pc')>=0||p.indexOf('steam')>=0||p.indexOf('epic')>=0||p.indexOf('gog')>=0||p.indexOf('itch')>=0||p.indexOf('drm')>=0
     }).map(function(g){
       var w=0;try{w=parseFloat(String(g.worth||'0').replace(/[^0-9.]/g,''))||0}catch(e){}
-      var st=mapSt(g.platforms),desc=pickDesc(g.description,g.instructions);
+      var st=mapSt(g.platforms);
+      // Если platforms='PC, DRM-Free' и магазин неизвестен — пробуем вытащить из названия "(Stove)"
+      if(st==='other'){
+        var fromTitle=inferStoreFromTitle(g.title);
+        if(fromTitle)st=fromTitle;
+      }
+      var desc=pickDesc(g.description,g.instructions);
       if(desc)desc=desc.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
       return nrm({
         id:'gp-'+g.id,
@@ -705,12 +755,14 @@ function extractSteamAppId(url){
   return m?m[1]:null;
 }
 function searchSteamId(title){
-  var nt=normT(title);
+  // ВАЖНО: чистим название от рекламного мусора (Stove)/(IndieGala)/Giveaway — иначе Steam не находит
+  var cleaned=canonTitle(title);
+  var nt=normT(cleaned);
   if(!nt||nt.length<3)return Promise.resolve(null);
-  var key='gv_sai_'+nt;
+  var key='gv_sai2_'+nt;
   var c=cGet(key,RATING_TTL);
   if(c!==null&&c!==undefined)return Promise.resolve(c||null);
-  var u='https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(title)+'&cc=us&l=english';
+  var u='https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(cleaned)+'&cc=us&l=english';
   return pFetch(u).then(function(r){
     if(!r||!r.items||!r.items.length){cSet(key,'');return null}
     // 1) точное совпадение
@@ -727,12 +779,14 @@ function searchSteamId(title){
 }
 /* Поиск AppID через CheapShark — основной путь: быстрее и стабильнее, чем Steam напрямую */
 function searchSteamIdViaCheapShark(title){
-  var nt=normT(title);
+  // ВАЖНО: чистим название перед поиском, иначе "GigaBash (Stove) Giveaway" → 0 матчей
+  var cleaned=canonTitle(title);
+  var nt=normT(cleaned);
   if(!nt||nt.length<3)return Promise.resolve(null);
-  var key='gv_cs_sai_'+nt;
+  var key='gv_cs_sai2_'+nt;
   var c=cGet(key,RATING_TTL);
   if(c!==null&&c!==undefined)return Promise.resolve(c||null);
-  var u='https://www.cheapshark.com/api/1.0/games?title='+encodeURIComponent(title)+'&limit=5';
+  var u='https://www.cheapshark.com/api/1.0/games?title='+encodeURIComponent(cleaned)+'&limit=8';
   return pFetch(u).then(function(r){
     if(!Array.isArray(r)||!r.length){cSet(key,'');return null}
     // 1) точное совпадение по названию + есть AppID
@@ -744,7 +798,8 @@ function searchSteamIdViaCheapShark(title){
     }
     // 2) частичное вхождение + есть AppID (для "Game: Subtitle")
     for(var j=0;j<r.length;j++){
-      if(r[j].steamAppID&&(normT(r[j].external).indexOf(nt)>=0||nt.indexOf(normT(r[j].external))>=0)){
+      var extN=normT(r[j].external);
+      if(r[j].steamAppID&&(extN.indexOf(nt)>=0||nt.indexOf(extN)>=0)){
         cSet(key,String(r[j].steamAppID));
         return String(r[j].steamAppID);
       }
@@ -1005,10 +1060,11 @@ function renderHero(activeList){
     return ((b.metacritic||0)+(b.posPct||0))-((a.metacritic||0)+(a.posPct||0));
   });
   var top=cand[0];
+  var dTitle=cleanDisplayTitle(top.title);
   var c=cdF(top.end);
   var gr={'epic':'#1a1a2e,#16213e','steam':'#1b2838,#2a475e','gog':'#1a0a2e,#2d1b69','itchio':'#2e1a1a,#691b1b'}[top.store]||'#1a1540,#2d1b69';
   var imgHtml=top.img
-    ? '<img src="'+esc(top.img)+'" alt="'+esc(top.title)+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">'
+    ? '<img src="'+esc(top.img)+'" alt="'+esc(dTitle)+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">'
     : '<div style="width:100%;height:100%;background:linear-gradient(135deg,'+gr+');display:flex;align-items:center;justify-content:center;font-size:48px;opacity:.4">🎮</div>';
   var badges='<span class="badge b-'+esc(top.store)+'">'+(top.store||'other').toUpperCase()+'</span>';
   if(top.worth>0)badges+='<span class="badge b-val">$'+top.worth.toFixed(0)+'</span>';
@@ -1068,11 +1124,12 @@ function skel(n){
 }
 function fCard(g,i){
   var tk=isTk(g.id),c=cdF(g.end),xp=isX(g),en=isEn(g);
+  var dTitle=cleanDisplayTitle(g.title);
   var gr={'epic':'#1a1a2e,#16213e','steam':'#1b2838,#2a475e','gog':'#1a0a2e,#2d1b69','itchio':'#2e1a1a,#691b1b'}[g.store]||'#1a1540,#2d1b69';
-  var altTxt=g.title?(g.title+' — раздача, забрать бесплатно'):'Игра — раздача';
+  var altTxt=dTitle?(dTitle+' — раздача, забрать бесплатно'):'Игра — раздача';
   var imgH=g.img
-    ?'<img src="'+esc(g.img)+'" class="gi" alt="'+esc(altTxt)+'" loading="lazy" referrerpolicy="no-referrer" onerror="_I(this)"><div class="gi-ph" style="display:none;background:linear-gradient(135deg,'+gr+')">'+esc(g.title)+'</div>'
-    :'<div class="gi-ph" style="background:linear-gradient(135deg,'+gr+')">'+esc(g.title)+'</div>';
+    ?'<img src="'+esc(g.img)+'" class="gi" alt="'+esc(altTxt)+'" loading="lazy" referrerpolicy="no-referrer" onerror="_I(this)"><div class="gi-ph" style="display:none;background:linear-gradient(135deg,'+gr+')">'+esc(dTitle)+'</div>'
+    :'<div class="gi-ph" style="background:linear-gradient(135deg,'+gr+')">'+esc(dTitle)+'</div>';
   var b='<span class="badge b-'+esc(g.store)+'">'+(g.store||'other').toUpperCase()+'</span>';
   if(g.worth>0)b+='<span class="badge b-val">$'+g.worth.toFixed(0)+'</span>';
   if(en&&!xp)b+='<span class="badge b-ending">⚡ СКОРО</span>';
@@ -1089,7 +1146,7 @@ function fCard(g,i){
   return '<div class="gc'+(xp?' xp':'')+(en&&!xp?' end':'')+'" style="animation-delay:'+(i*.03)+'s">'
     +'<button class="take-btn'+(tk?' on':'')+'" data-id="'+g.id+'" onclick="_T(\''+g.id+'\')">'+(tk?'✓':'＋')+'</button>'
     +imgH
-    +'<div class="gc-body"><div class="gc-head"><h3 class="gc-title">'+esc(g.title)+'</h3><div class="gc-badges">'+b+'</div></div>'
+    +'<div class="gc-body"><div class="gc-head"><h3 class="gc-title">'+esc(dTitle)+'</h3><div class="gc-badges">'+b+'</div></div>'
     +ratingHtml(g)
     +'<div class="gc-desc-wrap"><p class="gc-desc">'+esc(desc)+'</p>'+(desc&&desc.length>140?'<button class="desc-toggle" type="button" data-desc="'+g.id+'"><span class="txt">Подробнее</span><span class="arr">▾</span></button>':'')+'</div>'
     +cdH
