@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Prime Solutions — Независимое тестирование игровых продуктов</title>
+<style>
+  :root {
+    --gold: #c9a227;
+    --gold-light: #e8c547;
+    --dark: #07070d;
+    --dark2: #0f0f1a;
+    --dark3: #161625;
+    --dark4: #1e1e30;
+    --text: #e8e8f0;
+    --text-muted: #888899;
+    --accent: #6c5ce7;
+    --accent2: #a29bfe;
+    --border: rgba(201,162,39,0.18);
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark2); }
+  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(7,7,13,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px;
+    text-decoration: none; color: var(--text);
+  }
+
+  .nav-logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--gold), var(--accent));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+
+  .nav-logo span { color: var(--gold); }
+
+  .nav-links {
+    display: flex; gap: 32px; list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+    font-weight: 500; transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  .nav-cta {
+    background: linear-gradient(135deg, var(--gold), #b8891f);
+    color: var(--dark); font-weight: 700; font-size: 0.875rem;
+    padding: 10px 22px; border-radius: 8px; text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .burger {
+    display: none; flex-direction: column; gap: 5px; cursor: pointer;
+    background: none; border: none; padding: 4px;
+  }
+
+  .burger span {
+    width: 24px; height: 2px; background: var(--text); border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  /* ─── MOBILE NAV ─── */
+  .mobile-menu {
+    display: none; position: fixed; top: 68px; left: 0; right: 0;
+    background: var(--dark2); border-bottom: 1px solid var(--border);
+    padding: 20px 5%; flex-direction: column; gap: 16px; z-index: 99;
+  }
+
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { color: var(--text); text-decoration: none; font-size: 1rem; font-weight: 500; }
+  .mobile-menu a:hover { color: var(--gold); }
+
+  /* ─── SECTIONS BASE ─── */
+  section { padding: 90px 5%; }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    background: rgba(201,162,39,0.1);
+    border: 1px solid var(--border);
+    padding: 5px 14px; border-radius: 50px; margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800; line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  h2 span { color: var(--gold); }
+
+  .section-sub {
+    font-size: 1.05rem; color: var(--text-muted); max-width: 600px; margin-bottom: 52px;
+  }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding-top: 120px; padding-bottom: 60px;
+    position: relative; overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(108,92,231,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 20% 70%, rgba(201,162,39,0.08) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(201,162,39,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,162,39,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 720px; }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(201,162,39,0.1); border: 1px solid var(--border);
+    border-radius: 50px; padding: 6px 16px; margin-bottom: 28px;
+    font-size: 0.8rem; color: var(--gold); font-weight: 600;
+  }
+
+  .hero-badge::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: #22c55e; animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 900; line-height: 1.1;
+    margin-bottom: 22px; letter-spacing: -1px;
+  }
+
+  h1 .gold { color: var(--gold); }
+  h1 .purple { color: var(--accent2); }
+
+  .hero-desc {
+    font-size: 1.15rem; color: var(--text-muted);
+    margin-bottom: 38px; max-width: 560px;
+  }
+
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), #b8891f);
+    color: var(--dark); font-weight: 800; font-size: 0.95rem;
+    padding: 14px 32px; border-radius: 10px; text-decoration: none;
+    transition: all 0.2s; border: none; cursor: pointer;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,162,39,0.35); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text); font-weight: 600; font-size: 0.95rem;
+    padding: 14px 32px; border-radius: 10px; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.15); transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 52px; flex-wrap: wrap;
+  }
+
+  .stat { border-left: 2px solid var(--gold); padding-left: 16px; }
+  .stat-num { font-size: 1.8rem; font-weight: 900; color: var(--gold); line-height: 1; }
+  .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── TRUST STRIP ─── */
+  .trust-strip {
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 5%;
+    display: flex; align-items: center; justify-content: center;
+    gap: 40px; flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.85rem; color: var(--text-muted); font-weight: 500;
+  }
+
+  .trust-item .icon { font-size: 1.2rem; }
+
+  /* ─── ABOUT ─── */
+  #about { background: var(--dark2); }
+
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  }
+
+  .about-card {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px; margin-bottom: 16px;
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+
+  .about-card-icon {
+    width: 44px; height: 44px; min-width: 44px;
+    background: rgba(201,162,39,0.1); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  .about-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+  .about-card p { font-size: 0.85rem; color: var(--text-muted); }
+
+  .reg-box {
+    background: var(--dark3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    display: flex; align-items: center; gap: 14px; margin-top: 20px;
+  }
+
+  .reg-box .badge {
+    background: rgba(34,197,94,0.1); color: #22c55e;
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .reg-box p { font-size: 0.8rem; color: var(--text-muted); }
+  .reg-box strong { color: var(--text); font-size: 0.85rem; }
+
+  /* ─── SERVICES ─── */
+  #services { text-align: center; }
+
+  .services-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px; text-align: left;
+  }
+
+  .service-card {
+    background: var(--dark2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px 28px;
+    transition: all 0.3s; position: relative; overflow: hidden;
+  }
+
+  .service-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--accent));
+    transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+  }
+
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-card:hover { border-color: rgba(201,162,39,0.4); transform: translateY(-4px); }
+
+  .service-icon {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, rgba(201,162,39,0.15), rgba(108,92,231,0.15));
+    border: 1px solid var(--border); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin-bottom: 20px;
+  }
+
+  .service-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+  .service-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.65; }
+
+  /* ─── HOW IT WORKS ─── */
+  #how { background: var(--dark2); }
+
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0; position: relative;
+  }
+
+  .steps::before {
+    content: ''; position: absolute; top: 32px; left: 10%; right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--accent), var(--gold), transparent);
+    opacity: 0.3;
+  }
+
+  .step {
+    text-align: center; padding: 28px 20px; position: relative;
+  }
+
+  .step-num {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--dark3);
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 900; color: var(--gold);
+    margin: 0 auto 20px; position: relative; z-index: 1;
+  }
+
+  .step h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+  .step p { font-size: 0.82rem; color: var(--text-muted); }
+
+  /* ─── REQUIREMENTS ─── */
+  .req-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;
+  }
+
+  .req-item {
+    background: var(--dark2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+
+  .req-check {
+    width: 28px; height: 28px; min-width: 28px; border-radius: 50%;
+    background: rgba(201,162,39,0.12); border: 1px solid rgba(201,162,39,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 0.8rem; font-weight: 900; margin-top: 1px;
+  }
+
+  .req-item h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 3px; }
+  .req-item p { font-size: 0.82rem; color: var(--text-muted); }
+
+  /* ─── BENEFITS ─── */
+  #benefits { background: var(--dark2); }
+
+  .benefits-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;
+  }
+
+  .benefit {
+    background: var(--dark3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px 22px; text-align: center;
+    transition: transform 0.2s;
+  }
+
+  .benefit:hover { transform: translateY(-3px); }
+  .benefit .icon { font-size: 2rem; margin-bottom: 14px; display: block; }
+  .benefit h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .benefit p { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* ─── APPLY FORM ─── */
+  #apply {
+    background: var(--dark);
+    position: relative; overflow: hidden;
+  }
+
+  #apply::before {
+    content: '';
+    position: absolute; top: -200px; right: -200px;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(108,92,231,0.07) 0%, transparent 70%);
+  }
+
+  .form-wrapper {
+    max-width: 760px; margin: 0 auto; position: relative; z-index: 1;
+  }
+
+  .form-card {
+    background: var(--dark2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 48px;
+  }
+
+  .form-section-title {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 20px; margin-top: 36px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-section-title:first-of-type { margin-top: 0; }
+
+  .form-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  label {
+    display: block; font-size: 0.82rem; font-weight: 600;
+    color: var(--text-muted); margin-bottom: 7px;
+  }
+
+  label .req-star { color: var(--gold); margin-left: 2px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    background: var(--dark3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+  }
+
+  input::placeholder, textarea::placeholder { color: rgba(136,136,153,0.6); }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888899' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+  }
+
+  select option { background: var(--dark3); }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* NDA Block */
+  .nda-block {
+    background: var(--dark3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+  }
+
+  .nda-block h4 {
+    font-size: 0.9rem; font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .nda-text {
+    font-size: 0.78rem; color: var(--text-muted); line-height: 1.65;
+    max-height: 120px; overflow-y: auto; margin-bottom: 16px;
+    padding-right: 8px;
+  }
+
+  .nda-text::-webkit-scrollbar { width: 4px; }
+  .nda-text::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+  .checkbox-row {
+    display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px; min-width: 18px; margin-top: 1px;
+    accent-color: var(--gold); cursor: pointer;
+  }
+
+  .checkbox-row label {
+    font-size: 0.82rem; margin-bottom: 0; cursor: pointer; color: var(--text);
+  }
+
+  /* Signature Canvas */
+  .sig-area {
+    margin-top: 8px;
+  }
+
+  .sig-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+  }
+
+  .sig-clear {
+    background: none; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-muted); font-size: 0.75rem; padding: 4px 12px;
+    border-radius: 6px; cursor: pointer; transition: all 0.2s;
+  }
+
+  .sig-clear:hover { border-color: var(--gold); color: var(--gold); }
+
+  #signatureCanvas {
+    width: 100%; height: 140px;
+    background: var(--dark3);
+    border: 1px dashed rgba(201,162,39,0.4);
+    border-radius: 10px; cursor: crosshair; display: block;
+    touch-action: none;
+  }
+
+  .sig-hint {
+    font-size: 0.72rem; color: var(--text-muted); margin-top: 6px; text-align: center;
+  }
+
+  /* Submit */
+  .form-submit {
+    margin-top: 32px; text-align: center;
+  }
+
+  .btn-submit {
+    background: linear-gradient(135deg, var(--gold), #b8891f);
+    color: var(--dark); font-weight: 800; font-size: 1rem;
+    padding: 16px 48px; border-radius: 12px;
+    border: none; cursor: pointer; transition: all 0.2s;
+    width: 100%; max-width: 360px;
+  }
+
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(201,162,39,0.4); }
+
+  .form-note {
+    font-size: 0.75rem; color: var(--text-muted); margin-top: 12px;
+  }
+
+  /* Success */
+  .form-success {
+    display: none; text-align: center; padding: 48px 24px;
+  }
+
+  .form-success .success-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(34,197,94,0.1); border: 2px solid rgba(34,197,94,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; margin: 0 auto 20px;
+  }
+
+  .form-success h3 { font-size: 1.4rem; margin-bottom: 10px; }
+  .form-success p { font-size: 0.9rem; color: var(--text-muted); }
+
+  /* ─── FAQ ─── */
+  #faq { background: var(--dark2); }
+
+  .faq-list { max-width: 720px; margin: 0 auto; }
+
+  .faq-item {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 12px; overflow: hidden;
+  }
+
+  .faq-q {
+    width: 100%; background: var(--dark3);
+    border: none; color: var(--text);
+    padding: 20px 24px; font-size: 0.95rem; font-weight: 600;
+    text-align: left; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    transition: background 0.2s;
+  }
+
+  .faq-q:hover { background: var(--dark4); }
+
+  .faq-q .arrow {
+    font-size: 0.7rem; color: var(--gold);
+    transition: transform 0.3s; min-width: 16px;
+  }
+
+  .faq-item.open .faq-q .arrow { transform: rotate(180deg); }
+
+  .faq-a {
+    max-height: 0; overflow: hidden;
+    background: var(--dark3);
+    transition: max-height 0.35s ease, padding 0.35s ease;
+  }
+
+  .faq-item.open .faq-a { max-height: 300px; }
+
+  .faq-a-inner {
+    padding: 0 24px 20px; font-size: 0.875rem; color: var(--text-muted);
+    line-height: 1.7; border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    padding: 48px 5% 28px;
+  }
+
+  .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px; margin-bottom: 40px;
+  }
+
+  .footer-brand .nav-logo { margin-bottom: 14px; }
+  .footer-brand p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.65; }
+
+  .footer-col h5 {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px;
+  }
+
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul a {
+    color: var(--text-muted); text-decoration: none; font-size: 0.85rem;
+    transition: color 0.2s;
+  }
+
+  .footer-col ul a:hover { color: var(--gold); }
+
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+
+  .footer-bottom p { font-size: 0.78rem; color: var(--text-muted); }
+  .footer-legal { display: flex; gap: 20px; }
+  .footer-legal a {
+    font-size: 0.78rem; color: var(--text-muted);
+    text-decoration: none; transition: color 0.2s;
+  }
+
+  .footer-legal a:hover { color: var(--gold); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    nav { padding: 0 4%; }
+    .nav-links, .nav-cta { display: none; }
+    .burger { display: flex; }
+
+    section { padding: 64px 4%; }
+    h2 { font-size: 1.7rem; }
+    h1 { font-size: 2.2rem; letter-spacing: -0.5px; }
+
+    .hero-stats { gap: 24px; }
+
+    .about-grid { grid-template-columns: 1fr; gap: 32px; }
+
+    .form-row { grid-template-columns: 1fr; }
+    .form-card { padding: 28px 20px; }
+
+    .steps { grid-template-columns: 1fr 1fr; }
+    .steps::before { display: none; }
+
+    .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; }
+
+    .trust-strip { gap: 20px; }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 1.9rem; }
+    .hero-btns { flex-direction: column; }
+    .btn-primary, .btn-outline { text-align: center; }
+    .steps { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">🎯</div>
+    QA<span>Prime</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">О компании</a></li>
+    <li><a href="#services">Услуги</a></li>
+    <li><a href="#how">Как работаем</a></li>
+    <li><a href="#requirements">Требования</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="#apply" class="nav-cta">Стать тестировщиком</a>
+  <button class="burger" onclick="toggleMenu()" aria-label="Меню">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about" onclick="closeMenu()">О компании</a>
+  <a href="#services" onclick="closeMenu()">Услуги</a>
+  <a href="#how" onclick="closeMenu()">Как работаем</a>
+  <a href="#requirements" onclick="closeMenu()">Требования</a>
+  <a href="#benefits" onclick="closeMenu()">Условия</a>
+  <a href="#faq" onclick="closeMenu()">FAQ</a>
+  <a href="#apply" onclick="closeMenu()" style="color: var(--gold); font-weight: 700;">→ Подать заявку</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Набор открыт · Дистанционная работа</div>
+    <h1>Независимое тестирование <span class="gold">игровых</span> продуктов</h1>
+    <p class="hero-desc">
+      QA Prime — аккредитованная компания по тестированию и аудиту цифровых продуктов. Мы проверяем корректность работы казино-платформ, слотов, live-игр и мобильных приложений для крупных заказчиков.
+    </p>
+    <div class="hero-btns">
+      <a href="#apply" class="btn-primary">Стать тестировщиком →</a>
+      <a href="#about" class="btn-outline">Узнать больше</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">200+</div>
+        <div class="stat-label">Продуктов протестировано</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">5 лет</div>
+        <div class="stat-label">На рынке</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">40+</div>
+        <div class="stat-label">Партнёров-заказчиков</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">18+</div>
+        <div class="stat-label">Только совершеннолетние</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TRUST STRIP ═══ -->
+<div class="trust-strip">
+  <div class="trust-item"><span class="icon">🏛️</span> Официальная регистрация</div>
+  <div class="trust-item"><span class="icon">📋</span> Договор с каждым сотрудником</div>
+  <div class="trust-item"><span class="icon">🔒</span> NDA и защита данных</div>
+  <div class="trust-item"><span class="icon">💳</span> Официальные выплаты</div>
+  <div class="trust-item"><span class="icon">🌍</span> Дистанционный формат</div>
+</div>
+
+<!-- ═══ ABOUT ═══ -->
+<section id="about">
+  <div class="about-grid">
+    <div>
+      <div class="section-tag">О компании</div>
+      <h2>Мы — <span>профессиональная</span> QA-лаборатория</h2>
+      <p style="color: var(--text-muted); margin-bottom: 28px; line-height: 1.7;">
+        QA Prime Solutions — независимая компания технического тестирования и аудита игровых продуктов. Мы работаем с разработчиками программного обеспечения и операторами платформ, проверяя соответствие продуктов стандартам качества, честности и безопасности.
+      </p>
+      <p style="color: var(--text-muted); line-height: 1.7;">
+        Наши тестировщики работают дистанционно в реальных игровых средах, фиксируя данные, выявляя ошибки и составляя технические отчёты. Это полноценная профессиональная деятельность с официальным оформлением.
+      </p>
+      <div class="reg-box">
+        <div class="badge">✓ Зарегистрирована</div>
+        <div>
+          <strong>QA Prime Solutions LLC</strong>
+          <p>Рег. № 7712345678 · ИНН 771234567890 · ОГРН 1234567890123</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="about-card">
+        <div class="about-card-icon">🔬</div>
+        <div>
+          <h4>Независимый аудит</h4>
+          <p>Мы не аффилированы с операторами казино — это гарантирует объективность наших заключений.</p>
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">📊</div>
+        <div>
+          <h4>Задокументированные результаты</h4>
+          <p>Каждое тестирование завершается структурированным отчётом с доказательной базой.</p>
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🛡️</div>
+        <div>
+          <h4>Полная юридическая защита</h4>
+          <p>Официальный трудовой договор, NDA и страховка профессиональной ответственности.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section id="services">
+  <div class="section-tag">Что мы тестируем</div>
+  <h2>Направления <span>тестирования</span></h2>
+  <p class="section-sub" style="margin: 0 auto 52px;">Работаем со всем спектром цифровых игровых продуктов — от слотов до live-дилерских студий.</p>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">🎰</div>
+      <h3>Слоты и RNG</h3>
+      <p>Проверка генераторов случайных чисел, RTP (возврат игроку), математических моделей и бонусных механик.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🃏</div>
+      <h3>Live-казино</h3>
+      <p>Тестирование стриминговых студий, live-игр (блэкджек, рулетка, покер), качества видео и интерфейсов.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📱</div>
+      <h3>Мобильные платформы</h3>
+      <p>QA мобильных приложений для iOS и Android: производительность, UI/UX, корректность игровой логики.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">💳</div>
+      <h3>Платёжные системы</h3>
+      <p>Проверка корректности обработки транзакций, лимитов, верификации и систем вывода средств.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔐</div>
+      <h3>Безопасность и честность</h3>
+      <p>Анализ механизмов защиты от фрода, честности раздач, соответствия регуляторным требованиям.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🏆</div>
+      <h3>Спортивные ставки</h3>
+      <p>Тестирование букмекерских платформ: коэффициенты, live-ставки, кэшауты, пользовательский путь.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section id="how">
+  <div class="section-tag">Процесс</div>
+  <h2>Как <span>проходит</span> работа</h2>
+  <p class="section-sub">От заявки до первого задания — прозрачный и понятный процесс.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Подача заявки</h3>
+      <p>Заполняете анкету на сайте, подписываете NDA и соглашаетесь с условиями сотрудничества.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Проверка и оценка</h3>
+      <p>Наш HR проверяет данные, проводит короткое онлайн-собеседование и оценку навыков.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Оформление договора</h3>
+      <p>Подписываете официальный договор и получаете инструкции, доступы и тестовую среду.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Работа и выплаты</h3>
+      <p>Выполняете задания в удобное время и получаете вознаграждение на карту или электронный кошелёк.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ REQUIREMENTS ═══ -->
+<section id="requirements">
+  <div class="section-tag">Требования</div>
+  <h2>Кого мы <span>ищем</span></h2>
+  <p class="section-sub">Специальных технических знаний не требуется — важны внимательность и ответственность.</p>
+  <div class="req-grid">
+    <div class="req-item">
+      <div class="req-check">✓</div>
+      <div>
+        <h4>Возраст 18+</h4>
+        <p>Обязательное условие для работы с игровыми продуктами согласно законодательству.</p>
+      </div>
+    </div>
+    <div class="req-item">
+      <div class="req-check">✓</div>
+      <div>
+        <h4>Компьютер или смартфон</h4>
+        <p>Стабильное интернет-соединение и устройство для работы в браузере или приложениях.</p>
+      </div>
+    </div>
+    <div class="req-item">
+      <div class="req-check">✓</div>
+      <div>
+        <h4>Внимательность к деталям</h4>
+        <p>Умение замечать несоответствия, фиксировать результаты, следовать инструкциям.</p>
+      </div>
+    </div>
+    <div class="req-item">
+      <div class="req-check">✓</div>
+      <div>
+        <h4>Свободное время от 2 часов/день</h4>
+        <p>Гибкий график — работайте когда удобно, без жёсткой привязки ко времени.</p>
+      </div>
+    </div>
+    <div class="req-item">
+      <div class="req-check">✓</div>
+      <div>
+        <h4>Ответственность и конфиденциальность</h4>
+        <p>Соблюдение NDA — обязательное условие. Данные тестирования строго конфиденциальны.</p>
+      </div>
+    </div>
+    <div class="req-item">
+      <div class="req-check">✓</div>
+      <div>
+        <h4>Документы для оформления</h4>
+        <p>Паспорт или иной документ, удостоверяющий личность, для заключения официального договора.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BENEFITS ═══ -->
+<section id="benefits">
+  <div class="section-tag">Условия работы</div>
+  <h2>Почему выбирают <span>QA Prime</span></h2>
+  <p class="section-sub">Официальная работа, честные условия, никаких скрытых платежей.</p>
+  <div class="benefits-grid">
+    <div class="benefit">
+      <span class="icon">💰</span>
+      <h4>Конкурентная оплата</h4>
+      <p>Фиксированная ставка за сессию + бонусы за качественные отчёты</p>
+    </div>
+    <div class="benefit">
+      <span class="icon">🏠</span>
+      <h4>100% удалённо</h4>
+      <p>Работайте из любой точки мира — офис не нужен</p>
+    </div>
+    <div class="benefit">
+      <span class="icon">📅</span>
+      <h4>Гибкий график</h4>
+      <p>Сами выбираете время и количество сессий в день</p>
+    </div>
+    <div class="benefit">
+      <span class="icon">📄</span>
+      <h4>Официальный договор</h4>
+      <p>Трудовой договор или договор ГПХ — по вашему выбору</p>
+    </div>
+    <div class="benefit">
+      <span class="icon">🎓</span>
+      <h4>Обучение включено</h4>
+      <p>Вводный инструктаж и обучающие материалы перед стартом</p>
+    </div>
+    <div class="benefit">
+      <span class="icon">📈</span>
+      <h4>Карьерный рост</h4>
+      <p>Лучшие тестировщики переходят в Senior QA с повышением ставки</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ APPLY FORM ═══ -->
+<section id="apply">
+  <div class="form-wrapper">
+    <div style="text-align:center; margin-bottom: 36px;">
+      <div class="section-tag">Присоединиться</div>
+      <h2>Анкета <span>тестировщика</span></h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Заполните форму — мы свяжемся с вами в течение 2 рабочих дней.</p>
+    </div>
+
+    <div class="form-card">
+      <form id="applyForm" novalidate>
+
+        <!-- ЛИЧНЫЕ ДАННЫЕ -->
+        <div class="form-section-title">01 · Личные данные</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Имя <span class="req-star">*</span></label>
+            <input type="text" id="firstName" placeholder="Иван" required>
+          </div>
+          <div class="form-group">
+            <label>Фамилия <span class="req-star">*</span></label>
+            <input type="text" id="lastName" placeholder="Иванов" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email <span class="req-star">*</span></label>
+            <input type="email" id="email" placeholder="ivan@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Телефон <span class="req-star">*</span></label>
+            <input type="tel" id="phone" placeholder="+7 900 000-00-00" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Дата рождения <span class="req-star">*</span></label>
+            <input type="date" id="birthDate" required>
+          </div>
+          <div class="form-group">
+            <label>Страна проживания <span class="req-star">*</span></label>
+            <select id="country" required>
+              <option value="" disabled selected>Выберите страну</option>
+              <option>Россия</option>
+              <option>Украина</option>
+              <option>Беларусь</option>
+              <option>Казахстан</option>
+              <option>Другая</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ОПЫТ -->
+        <div class="form-section-title">02 · Опыт и оборудование</div>
+        <div class="form-group">
+          <label>Опыт с онлайн-играми / казино <span class="req-star">*</span></label>
+          <select id="experience" required>
+            <option value="" disabled selected>Выберите вариант</option>
+            <option>Нет опыта — готов(а) обучаться</option>
+            <option>Менее 1 года</option>
+            <option>1–3 года</option>
+            <option>3+ лет — опытный пользователь</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Доступные устройства <span class="req-star">*</span></label>
+            <select id="device" required>
+              <option value="" disabled selected>Выберите основное</option>
+              <option>ПК / Ноутбук</option>
+              <option>Смартфон iOS</option>
+              <option>Смартфон Android</option>
+              <option>Несколько устройств</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Свободного времени в день</label>
+            <select id="availability">
+              <option value="" disabled selected>Выберите</option>
+              <option>1–2 часа</option>
+              <option>2–4 часа</option>
+              <option>4–6 часов</option>
+              <option>Более 6 часов</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>О себе (необязательно)</label>
+          <textarea id="about" placeholder="Расскажите немного о себе, опыте или почему хотите работать тестировщиком..."></textarea>
+        </div>
+
+        <!-- NDA + УСЛОВИЯ -->
+        <div class="form-section-title">03 · Соглашения</div>
+        <div class="nda-block">
+          <h4>📋 Соглашение о неразглашении (NDA)</h4>
+          <div class="nda-text">
+            Настоящее Соглашение о неразглашении (NDA) заключается между QA Prime Solutions LLC («Компания») и Сотрудником. Сотрудник обязуется:<br><br>
+            <strong>1. Конфиденциальность.</strong> Не раскрывать третьим лицам любую информацию, полученную в ходе тестирования, включая: названия и характеристики тестируемых продуктов, сведения о заказчиках, результаты тестов, методологию работы, внутреннюю документацию Компании.<br><br>
+            <strong>2. Срок действия.</strong> Обязательства по неразглашению действуют в течение 3 (трёх) лет с момента подписания, а также после прекращения сотрудничества.<br><br>
+            <strong>3. Ответственность.</strong> Нарушение условий NDA влечёт гражданско-правовую ответственность в соответствии с действующим законодательством.<br><br>
+            <strong>4. Использование данных.</strong> Информация, полученная в ходе работы, используется исключительно для составления технических отчётов в рамках выполняемых заданий.<br><br>
+            <strong>5. Ограничения.</strong> Сотрудник обязуется не использовать тестовые аккаунты и доступы в личных целях, а также не вносить несанкционированные изменения в тестируемые системы.
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="ndaCheck" required>
+            <label for="ndaCheck">Я прочитал(а) и согласен(на) с Соглашением о неразглашении (NDA) <span class="req-star">*</span></label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="termsCheck" required>
+            <label for="termsCheck">Я согласен(на) с условиями сотрудничества, политикой конфиденциальности и обработкой персональных данных <span class="req-star">*</span></label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="ageCheck" required>
+            <label for="ageCheck">Подтверждаю, что мне исполнилось 18 лет <span class="req-star">*</span></label>
+          </div>
+        </div>
+
+        <!-- ПОДПИСЬ -->
+        <div class="form-section-title">04 · Электронная подпись</div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+          Распишитесь в поле ниже — это является вашей электронной подписью, подтверждающей согласие с условиями сотрудничества.
+        </p>
+        <div class="sig-area">
+          <div class="sig-header">
+            <label style="margin-bottom: 0;">Ваша подпись <span class="req-star">*</span></label>
+            <button type="button" class="sig-clear" onclick="clearSignature()">Очистить</button>
+          </div>
+          <canvas id="signatureCanvas"></canvas>
+          <p class="sig-hint">Используйте мышь или палец на сенсорном экране для подписи</p>
+        </div>
+
+        <div class="form-submit">
+          <button type="submit" class="btn-submit">Отправить заявку →</button>
+          <p class="form-note">🔒 Данные передаются по зашифрованному каналу и не передаются третьим лицам</p>
+        </div>
+
+      </form>
+
+      <!-- SUCCESS STATE -->
+      <div class="form-success" id="formSuccess">
+        <div class="success-icon">✅</div>
+        <h3>Заявка принята!</h3>
+        <p>Мы получили вашу анкету и свяжемся с вами в течение <strong>2 рабочих дней</strong>.<br>Проверьте папку «Спам», если не получили письмо.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section id="faq">
+  <div style="text-align:center; margin-bottom: 48px;">
+    <div class="section-tag">Частые вопросы</div>
+    <h2>Вопросы и <span>ответы</span></h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Нужен ли опыт в тестировании ПО? <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">Нет. Мы принимаем соискателей без технического опыта. Перед началом работы все тестировщики проходят обязательный вводный инструктаж. Главное — внимательность и готовность следовать инструкциям.</div>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Это законно? Каков правовой статус работы? <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">Да, абсолютно законно. QA Prime Solutions — официально зарегистрированная компания. Мы оказываем услуги технического тестирования (QA) по заказу разработчиков. С каждым сотрудником заключается официальный гражданско-правовой договор или трудовой договор.</div>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Придётся ли вносить деньги для работы? <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">Нет никаких вступительных взносов, депозитов или платежей. Мы — работодатель. Любые предложения заплатить деньги за «доступ» или «обучение» — признак мошенничества. Если видите подобное под нашим именем, сообщите нам.</div>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Как происходит оплата и в каком размере? <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">Оплата производится дважды в месяц — на банковскую карту или электронный кошелёк. Базовая ставка составляет от 800 до 2 500 ₽ за тестовую сессию в зависимости от сложности задания. Дополнительные бонусы — за выявление критических ошибок и своевременную сдачу отчётов.</div>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Сколько времени нужно уделять работе? <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">Минимум — 1 тестовая сессия (около 2 часов) в день. Максимум — по вашим возможностям. График полностью гибкий, задания доступны в течение дня. Вы сами решаете, когда и сколько работать.</div>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Какую информацию нельзя разглашать? <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">Согласно NDA, запрещено раскрывать: названия тестируемых продуктов, данные заказчиков, внутренние процессы и методологию Компании, результаты тестов до их официальной публикации. Это стандартная практика в QA-индустрии для защиты интеллектуальной собственности клиентов.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="margin-bottom: 14px; display: inline-flex;">
+        <div class="nav-logo-icon">🎯</div>
+        QA<span style="color: var(--gold);">Prime</span>
+      </a>
+      <p>QA Prime Solutions — независимая лаборатория тестирования цифровых игровых продуктов. Официальная регистрация, прозрачные условия, честная оплата.</p>
+      <p style="margin-top: 12px; font-size: 0.75rem;">ООО «КА Прайм Солюшенс» · ОГРН 1234567890123 · ИНН 771234567890</p>
+    </div>
+    <div class="footer-col">
+      <h5>Навигация</h5>
+      <ul>
+        <li><a href="#about">О компании</a></li>
+        <li><a href="#services">Услуги</a></li>
+        <li><a href="#how">Как работаем</a></li>
+        <li><a href="#requirements">Требования</a></li>
+        <li><a href="#benefits">Условия</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Контакты</h5>
+      <ul>
+        <li><a href="mailto:hr@qaprime.io">hr@qaprime.io</a></li>
+        <li><a href="mailto:info@qaprime.io">info@qaprime.io</a></li>
+        <li><a href="#">Telegram: @qaprime_hr</a></li>
+        <li><a href="#">WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 QA Prime Solutions. Все права защищены.</p>
+    <div class="footer-legal">
+      <a href="#">Политика конфиденциальности</a>
+      <a href="#">Условия использования</a>
+      <a href="#">Правовая информация</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+// ─── NAV ───
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+// ─── FAQ ───
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// ─── SIGNATURE CANVAS ───
+const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let hasSig = false;
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.strokeStyle = '#c9a227';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  if (e.touches) {
+    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+  }
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+canvas.addEventListener('mousedown', e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; });
+canvas.addEventListener('mouseup', () => { drawing = false; });
+canvas.addEventListener('mouseleave', () => { drawing = false; });
+
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; }, { passive: false });
+canvas.addEventListener('touchend', () => { drawing = false; });
+
+function clearSignature() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hasSig = false;
+}
+
+// ─── FORM SUBMIT ───
+document.getElementById('applyForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const fields = ['firstName','lastName','email','phone','birthDate','country','experience','device'];
+  let valid = true;
+
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) {
+      el.style.borderColor = '#ef4444';
+      valid = false;
+    } else {
+      el.style.borderColor = '';
+    }
+  });
+
+  // Age check
+  const bd = new Date(document.getElementById('birthDate').value);
+  const now = new Date();
+  const age = (now - bd) / (1000 * 60 * 60 * 24 * 365.25);
+  if (age < 18) {
+    document.getElementById('birthDate').style.borderColor = '#ef4444';
+    alert('Вам должно быть не менее 18 лет для участия.');
+    return;
+  }
+
+  if (!document.getElementById('ndaCheck').checked) {
+    alert('Пожалуйста, согласитесь с условиями NDA.');
+    return;
+  }
+  if (!document.getElementById('termsCheck').checked) {
+    alert('Пожалуйста, примите условия сотрудничества.');
+    return;
+  }
+  if (!document.getElementById('ageCheck').checked) {
+    alert('Необходимо подтвердить возраст 18+.');
+    return;
+  }
+  if (!hasSig) {
+    canvas.style.borderColor = '#ef4444';
+    alert('Пожалуйста, поставьте электронную подпись.');
+    return;
+  }
+
+  if (!valid) {
+    alert('Пожалуйста, заполните все обязательные поля.');
+    return;
+  }
+
+  // Show success
+  document.getElementById('applyForm').style.display = 'none';
+  document.getElementById('formSuccess').style.display = 'block';
+  document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+// ─── SCROLL EFFECTS ───
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.style.opacity = '1'; });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section').forEach(s => {
+  s.style.opacity = '0';
+  s.style.transition = 'opacity 0.6s ease';
+  observer.observe(s);
+});
+</script>
+
+</body>
+</html>
