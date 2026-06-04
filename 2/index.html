@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Ретушь фото онлайн для профессиональных фотографов</title>
+
+  <meta name="description" content="Профессиональная ретушь фото онлайн. 4 тестовых фото бесплатно. Фиксированная цена $35 за фото." />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #080808;
+      color: #ffffff;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .page {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 32px 20px;
+      background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 32%),
+        linear-gradient(180deg, #111111 0%, #080808 100%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 72px;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .top-link {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 10px 16px;
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .top-link:hover {
+      color: #080808;
+      background: #ffffff;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 22px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 14px;
+    }
+
+    h1 {
+      max-width: 760px;
+      font-size: clamp(42px, 6vw, 82px);
+      line-height: 0.98;
+      letter-spacing: -0.06em;
+      margin-bottom: 26px;
+    }
+
+    .subtitle {
+      max-width: 620px;
+      font-size: clamp(18px, 2vw, 24px);
+      color: rgba(255, 255, 255, 0.72);
+      margin-bottom: 34px;
+    }
+
+    .offer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .offer-item {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .offer-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.52);
+    }
+
+    .offer-value {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 54px;
+      padding: 0 24px;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #080808;
+      font-size: 16px;
+      font-weight: 700;
+      border: 0;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      background: #eaeaea;
+    }
+
+    .note {
+      max-width: 260px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.56);
+    }
+
+    .hero-card {
+      position: relative;
+      border-radius: 34px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      aspect-ratio: 4 / 5;
+      min-height: 460px;
+    }
+
+    .hero-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.92;
+    }
+
+    .hero-card-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 16px;
+    }
+
+    .hero-card-label {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .hero-card-label strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 18px;
+    }
+
+    .hero-card-label span {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.66);
+    }
+
+    .section {
+      padding: 92px 20px;
+    }
+
+    .section-header {
+      max-width: 720px;
+      margin-bottom: 34px;
+    }
+
+    .section-eyebrow {
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    h2 {
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+    }
+
+    .section-text {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.66);
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .photo-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: #151515;
+      aspect-ratio: 4 / 5;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: 0.35s ease;
+    }
+
+    .photo-card:hover img {
+      transform: scale(1.04);
+    }
+
+    .form-section {
+      padding: 92px 20px 110px;
+      background:
+        radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.1), transparent 30%),
+        #0c0c0c;
+    }
+
+    .form-wrap {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .form-box {
+      padding: 28px;
+      border-radius: 28px;
+      background: #ffffff;
+      color: #080808;
+    }
+
+    .form-title {
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .form-text {
+      margin-bottom: 24px;
+      color: rgba(0, 0, 0, 0.62);
+      font-size: 16px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.68);
+    }
+
+    input {
+      width: 100%;
+      height: 54px;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      background: #f6f6f6;
+      border-radius: 14px;
+      padding: 0 16px;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #080808;
+      background: #ffffff;
+    }
+
+    .submit {
+      width: 100%;
+      margin-top: 8px;
+      min-height: 56px;
+      border: 0;
+      border-radius: 999px;
+      background: #080808;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .submit:hover {
+      transform: translateY(-2px);
+      background: #222222;
+    }
+
+    .privacy {
+      margin-top: 14px;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.46);
+    }
+
+    .footer {
+      padding: 28px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.44);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        min-height: auto;
+        padding-top: 24px;
+      }
+
+      .topline {
+        margin-bottom: 44px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 38px;
+      }
+
+      .offer {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        min-height: 380px;
+      }
+
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .form-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topline {
+        align-items: flex-start;
+        gap: 16px;
+        flex-direction: column;
+      }
+
+      .top-link {
+        width: 100%;
+        text-align: center;
+      }
+
+      .hero {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .section,
+      .form-section {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      h1 {
+        font-size: 42px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+      }
+
+      .gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-card {
+        border-radius: 20px;
+      }
+
+      .form-box {
+        padding: 22px;
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="hero">
+      <div class="container">
+        <div class="topline">
+          <div class="logo">Retouch Club</div>
+          <a class="top-link" href="#contact">Оставить заявку</a>
+        </div>
+
+        <div class="hero-grid">
+          <div>
+            <div class="badge">Профессиональная ретушь фото онлайн</div>
+
+            <h1>Заставим ваши фотографии сверкать как бриллианты 💎</h1>
+
+            <p class="subtitle">
+              Ретушь фото онлайн для профессиональных фотографов, брендов и студий.
+              Быстро, аккуратно, с вниманием к деталям.
+            </p>
+
+            <div class="offer">
+              <div class="offer-item">
+                <span class="offer-label">Тест</span>
+                <span class="offer-value">4 фото бесплатно</span>
+              </div>
+
+              <div class="offer-item">
+                <span class="offer-label">Цена</span>
+                <span class="offer-value">$35 за фото</span>
+              </div>
+
+              <div class="offer-item">
+                <span class="offer-label">Условие</span>
+                <span class="offer-value">Фиксация на год</span>
+              </div>
+            </div>
+
+            <div class="cta-row">
+              <a class="button" href="#contact">Получить тестовую ретушь</a>
+              <p class="note">Напишите сейчас и зафиксируйте это предложение на год.</p>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <div class="hero-card-fallback">
+              Загрузите фото в папку images с названием 1.jpg
+            </div>
+            <img src="images/1.jpg" alt="Пример профессиональной ретуши фото" onerror="this.style.display='none';" />
+            <div class="hero-card-label">
+              <strong>Ретушь для фотографов</strong>
+              <span>Портреты, fashion, beauty, commercial, editorial</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-eyebrow">Portfolio</div>
+            <h2>Примеры работ</h2>
+            <p class="section-text">
+              Ниже можно показать 8-15 лучших фото. Чем сильнее визуал, тем проще человеку оставить заявку.
+            </p>
+          </div>
+
+          <div class="gallery" id="gallery"></div>
+        </div>
+      </section>
+
+      <section class="form-section" id="contact">
+        <div class="container">
+          <div class="form-wrap">
+            <div>
+              <div class="section-eyebrow">Application</div>
+              <h2>Получите 4 тестовых фото бесплатно</h2>
+              <p class="section-text">
+                Оставьте имя и email. Мы свяжемся с вами и обсудим тестовую ретушь.
+              </p>
+            </div>
+
+            <div class="form-box">
+              <div class="form-title">Оставить заявку</div>
+              <p class="form-text">Заполните 2 поля. Без лишних вопросов.</p>
+
+              <form action="https://formsubmit.co/YOUR_EMAIL@example.com" method="POST">
+                <input type="hidden" name="_subject" value="Новая заявка на ретушь фото">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_template" value="table">
+
+                <div class="field">
+                  <label for="name">ФИО</label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="ФИО"
+                    placeholder="Ваше имя"
+                    required
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    name="Email"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+
+                <button class="submit" type="submit">Отправить заявку</button>
+
+                <p class="privacy">
+                  Нажимая кнопку, вы отправляете заявку на тестовую ретушь.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      © Retouch Club. Professional photo retouching online.
+    </footer>
+  </div>
+
+  <script>
+    const gallery = document.getElementById("gallery");
+    const maxPhotos = 15;
+    const extensions = ["jpg", "jpeg", "png", "webp"];
+
+    function tryLoadImage(photoNumber, extensionIndex = 0) {
+      if (extensionIndex >= extensions.length) {
+        return;
+      }
+
+      const extension = extensions[extensionIndex];
+      const src = `images/${photoNumber}.${extension}`;
+
+      const img = new Image();
+      img.src = src;
+      img.alt = `Пример ретуши фото ${photoNumber}`;
+      img.loading = "lazy";
+
+      img.onload = function () {
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        card.appendChild(img);
+        gallery.appendChild(card);
+      };
+
+      img.onerror = function () {
+        tryLoadImage(photoNumber, extensionIndex + 1);
+      };
+    }
+
+    for (let i = 1; i <= maxPhotos; i++) {
+      tryLoadImage(i);
+    }
+  </script>
+</body>
+</html>
