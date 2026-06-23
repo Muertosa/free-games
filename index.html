@@ -194,6 +194,20 @@ body.light .gc{box-shadow:0 2px 10px rgba(0,0,0,0.05)}
 .next-epic-cd b{font-family:'Unbounded',sans-serif;color:#fff;font-size:14px}
 .next-epic-approx{font-size:10px;color:var(--text3);font-weight:700}
 @media(max-width:640px){.next-epic{padding:12px 14px;gap:10px}.next-epic-cd{font-size:13px;padding:7px 12px}}
+/* ===== Кнопка "Поделиться" + подсветка при deep-link ===== */
+.gc-actions{display:flex;align-items:center;gap:8px}
+.share-btn{width:36px;height:36px;flex-shrink:0;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text2);cursor:pointer;font-family:inherit;font-size:15px;display:inline-flex;align-items:center;justify-content:center;transition:all .2s;line-height:1;padding:0}
+.share-btn:hover{background:rgba(124,58,237,0.14);border-color:rgba(124,58,237,0.35);color:var(--accent2);transform:scale(1.06)}
+.share-btn:active{transform:scale(.94)}
+.gc.shared{border-color:rgba(124,58,237,0.6);box-shadow:0 0 0 2px rgba(124,58,237,0.35),0 12px 40px var(--glow);animation:sharedGlow 2.4s ease}
+@keyframes sharedGlow{0%{box-shadow:0 0 0 3px rgba(124,58,237,0.55),0 12px 44px rgba(124,58,237,0.4)}100%{box-shadow:0 0 0 2px rgba(124,58,237,0.2),0 12px 40px var(--glow)}}
+.shared-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(96,165,250,0.1));border:1px solid rgba(124,58,237,0.3);border-radius:14px;padding:13px 20px;margin-bottom:18px;animation:fadeUp .4s ease-out}
+.shared-banner .sbn-ico{font-size:24px;line-height:1}
+.shared-banner .sbn-txt{font-weight:700;font-size:13px;color:var(--text);line-height:1.4}
+.shared-banner .sbn-txt b{font-family:'Unbounded',sans-serif;font-weight:700;color:var(--accent2)}
+.shared-banner .sbn-close{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:8px;width:28px;height:28px;cursor:pointer;font-family:inherit;font-size:14px;flex-shrink:0}
+.shared-banner .sbn-close:hover{color:var(--text);background:rgba(255,255,255,0.06)}
+@media(max-width:640px){.shared-banner{padding:11px 14px;gap:9px}.shared-banner .sbn-txt{font-size:12px}}
 /* ===== Блок оценок (Metacritic + Steam %) ===== */
 .gc-ratings{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .rt{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;font-size:11px;font-weight:800;border:1px solid var(--border);background:rgba(255,255,255,0.03);line-height:1}
@@ -325,6 +339,7 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
       <button class="tool-btn" id="bClr">🗑️ Очистить</button>
     </div>
     <div class="stats" id="fSt"></div>
+    <div id="sharedBanner"></div>
     <div id="nextEpicBox"></div>
     <div id="heroBox"></div>
     <div id="fO"></div>
@@ -418,6 +433,7 @@ var dFl='all',dSo='savings',dMn=50,dMx=100,dPr=60,dPg=0,DPP=30;
 var taken={},theme='dark',dLoaded=false;
 var dStore='all',dLoadedPages=0;
 var seen={};
+var pendingShareId=null, pendingShareTitle='', shareHandled=false;
 // Звуковые уведомления:
 var audioCtx=null, audioUnlocked=false, soundMuted=false;
 var notifiedIds={}, firstCheck=true;
@@ -1119,6 +1135,7 @@ function renderHero(activeList){
         +'<div class="hero-actions">'
           +'<a href="'+esc(top.url||'#')+'" target="_blank" rel="noopener noreferrer" class="hero-cta">Забрать бесплатно →</a>'
           +'<button class="hero-take'+(tk?' on':'')+'" onclick="_T(\''+top.id+'\')">'+(tk?'✓ Забрано':'＋ Отметить')+'</button>'
+          +'<button class="share-btn" type="button" title="Поделиться с другом" onclick="_S(\''+top.id+'\')">🔗</button>'
         +'</div>'
       +'</div>'
     +'</div>';
@@ -1183,8 +1200,136 @@ function tickNextEpic(){
 }
 
 /* ============================================================
-   17. РЕНДЕР: ОЦЕНКИ
+   16.8. ПОДЕЛИТЬСЯ ИГРОЙ + DEEP-LINK (?game=id&t=название)
+   Без сервера: navigator.share() на мобилке, копирование как фолбэк.
    ============================================================ */
+// Базовый URL сайта без query/hash
+function siteBase(){
+  return location.origin+location.pathname;
+}
+// Ссылка на конкретную игру: ведёт на наш сайт с якорем
+function buildShareUrl(g){
+  var u=siteBase()+'?game='+encodeURIComponent(g.id);
+  var t=cleanDisplayTitle(g.title);
+  if(t)u+='&t='+encodeURIComponent(t);
+  return u;
+}
+// Текст сообщения для друга
+function buildShareText(g){
+  var t=cleanDisplayTitle(g.title);
+  var msg='🎮 '+t+' — сейчас бесплатно';
+  if(g.store&&g.store!=='other'){
+    var sn={epic:'в Epic Games',steam:'в Steam',gog:'на GOG',itchio:'на itch.io'}[g.store];
+    if(sn)msg+=' '+sn;
+  }
+  if(g.worth>0)msg+=' (обычно $'+g.worth.toFixed(0)+')';
+  msg+='!';
+  var c=cdF(g.end);
+  if(c&&!c.x)msg+=' Успей забрать — осталось '+c.t+'.';
+  else msg+=' Успей забрать.';
+  return msg;
+}
+function copyToClipboard(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text);
+  }
+  // Фолбэк для старых браузеров
+  return new Promise(function(res,rej){
+    try{
+      var ta=document.createElement('textarea');
+      ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      var ok=document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok?res():rej();
+    }catch(e){rej(e)}
+  });
+}
+function shareGame(id){
+  var g=FG.find(function(x){return x.id===id});
+  if(!g){toast('Игра не найдена','err');return}
+  var url=buildShareUrl(g);
+  var text=buildShareText(g);
+  // 1) Нативный шэринг (в основном мобилки) — меню с Telegram/WhatsApp/VK и т.д.
+  if(navigator.share){
+    navigator.share({title:'FreeGamer 🎮',text:text,url:url}).catch(function(){/* пользователь отменил — молчим */});
+    return;
+  }
+  // 2) Фолбэк: копируем "текст + ссылку" в буфер
+  copyToClipboard(text+' '+url).then(function(){
+    toast('🔗 Ссылка скопирована — отправь другу','ok');
+  }).catch(function(){
+    // 3) Если и буфер недоступен — открываем шэринг в Telegram
+    var tg='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);
+    window.open(tg,'_blank','noopener,noreferrer');
+  });
+}
+window._S=shareGame;
+
+// Прочитать ?game=...&t=... из URL один раз при старте
+function readShareParam(){
+  try{
+    var p=new URLSearchParams(location.search);
+    var id=p.get('game');
+    if(id){
+      pendingShareId=id;
+      pendingShareTitle=p.get('t')||'';
+    }
+  }catch(e){}
+}
+// Убрать query из адресной строки, чтобы при перезагрузке не триггерилось снова
+function cleanUrlBar(){
+  try{
+    if(location.search&&history.replaceState){
+      history.replaceState(null,'',siteBase()+location.hash);
+    }
+  }catch(e){}
+}
+// Применить deep-link: найти игру, проскроллить, подсветить (или тост, если кончилась)
+function applyDeepLink(){
+  if(shareHandled||!pendingShareId)return;
+  // Гарантируем, что мы на вкладке "Бесплатные" и без фильтров/поиска,
+  // иначе карточки может не быть в DOM
+  if(sec!=='free'){switchS('free');}
+  var g=FG.find(function(x){return x.id===pendingShareId&&!isX(x)});
+  if(g){
+    // Сброс фильтров/поиска, чтобы карточка точно отрисовалась
+    fFl='all';fTab='active';
+    if($('fS'))$('fS').value='';
+    document.querySelectorAll('.stab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ft')==='active')});
+    renF();
+    shareHandled=true;
+    showSharedBanner(cleanDisplayTitle(g.title),false);
+    // Дать DOM отрисоваться, затем скролл + подсветка
+    setTimeout(function(){
+      var card=document.querySelector('.take-btn[data-id="'+CSS.escape(pendingShareId)+'"]');
+      card=card?card.closest('.gc'):null;
+      if(card){
+        card.scrollIntoView({behavior:'smooth',block:'center'});
+        card.classList.add('shared');
+        setTimeout(function(){card.classList.remove('shared')},2600);
+      }
+    },120);
+  }else{
+    // Игра уже кончилась / не нашлась — честный тост + баннер
+    shareHandled=true;
+    var nm=pendingShareTitle||'эта игра';
+    toast('😔 «'+nm+'» уже разобрали. Лови, что есть сейчас','info');
+    showSharedBanner(nm,true);
+  }
+  cleanUrlBar();
+}
+function showSharedBanner(name,expired){
+  var box=$('sharedBanner');if(!box)return;
+  if(sec!=='free'){box.innerHTML='';return}
+  var inner=expired
+    ? '<span class="sbn-ico">🕒</span><span class="sbn-txt">Раздача <b>'+esc(name)+'</b>, которой с тобой поделились, уже закончилась. Но ниже есть актуальные!</span>'
+    : '<span class="sbn-ico">🎁</span><span class="sbn-txt">С тобой поделились игрой <b>'+esc(name)+'</b> — она ниже, забирай бесплатно!</span>';
+  box.innerHTML='<div class="shared-banner">'+inner+'<button class="sbn-close" onclick="_CSB()" title="Скрыть">✕</button></div>';
+}
+window._CSB=function(){var b=$('sharedBanner');if(b)b.innerHTML=''};
+
+
 function ratingHtml(g){
   var has=g&&(g.metacritic||g.posPct);
   if(!has)return '';
@@ -1239,7 +1384,7 @@ function fCard(g,i){
     +ratingHtml(g)
     +'<div class="gc-desc-wrap"><p class="gc-desc">'+esc(desc)+'</p>'+(desc&&desc.length>140?'<button class="desc-toggle" type="button" data-desc="'+g.id+'"><span class="txt">Подробнее</span><span class="arr">▾</span></button>':'')+'</div>'
     +cdH
-    +'<div class="gc-foot"><div class="p-free">Бесплатно</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer" class="gc-link'+(xp?' dis':'')+'">'+(xp?'Закончилась':'Забрать →')+'</a></div>'
+    +'<div class="gc-foot"><div class="p-free">Бесплатно</div><div class="gc-actions">'+(xp?'':'<button class="share-btn" type="button" title="Поделиться с другом" onclick="_S(\''+g.id+'\')">🔗</button>')+'<a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer" class="gc-link'+(xp?' dis':'')+'">'+(xp?'Закончилась':'Забрать →')+'</a></div></div>'
     +'</div></div>'
 }
 function takenToGame(id){
@@ -1460,6 +1605,8 @@ function loadF(force){
       updC();renF();
       // Таймер Epic из кэша (если есть)
       var ce=cGet('gv_nextepic',EPIC_NEXT_TTL);if(ce)nextEpic=ce;renderNextEpic();
+      // Deep-link из кэша — мгновенная подсветка, не дожидаясь сети
+      applyDeepLink();
       // Даже если кэш свежий — догоняем оценки (старый кэш мог быть без них)
       var missing=FG.filter(function(g){return !g.metacritic && !g.posPct});
       if(missing.length){
@@ -1493,6 +1640,8 @@ function loadF(force){
         updC();renF();
         // Таймер до следующей раздачи Epic (nextEpic заполнен в fetchEpic)
         renderNextEpic();
+        // Deep-link: если пришли по ?game= — подсветить игру
+        applyDeepLink();
         // 3) Звуковое уведомление при появлении новых ID
         checkNewGames();
         // 4) Фоновое обогащение оценками (CheapShark → Steam fallback)
@@ -1711,6 +1860,8 @@ $('rMx').value=dMx;$('rvMx').textContent=dMx+'%';
 $('rPr').value=dPr;$('rvPr').textContent=dPr>=60?'Любая':'$'+dPr;
 $('upTime').textContent=new Date().toLocaleString('ru-RU');
 setCountLoading($('navF'));
+// Прочитать ?game= из URL до первой загрузки (deep-link от друга)
+readShareParam();
 // Таймер Epic из кэша на старте (до первой загрузки)
 (function(){var ce=cGet('gv_nextepic',EPIC_NEXT_TTL);if(ce)nextEpic=ce;renderNextEpic();})();
 loadF();initDealsBadge();
