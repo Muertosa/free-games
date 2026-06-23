@@ -183,6 +183,17 @@ body.light .gc{box-shadow:0 2px 10px rgba(0,0,0,0.05)}
   .hero-img-wrap::after{background:linear-gradient(to bottom,transparent 50%,var(--card) 100%)}
   .hero-body{padding:20px}
 }
+/* ===== Таймер до следующей раздачи Epic ===== */
+.next-epic{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(124,58,237,0.08));border:1px solid rgba(96,165,250,0.25);border-radius:14px;padding:14px 22px;margin-bottom:18px;animation:fadeUp .4s ease-out}
+.next-epic-ico{font-size:26px;line-height:1;filter:drop-shadow(0 6px 14px rgba(96,165,250,.3))}
+.next-epic-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.next-epic-label{font-size:11px;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.next-epic-title{font-family:'Unbounded',sans-serif;font-weight:700;font-size:14px;color:var(--text);line-height:1.25;word-break:break-word}
+.next-epic-title.muted{font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--text3)}
+.next-epic-cd{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.28);border-radius:10px;color:#bfdbfe;font-weight:800;font-size:14px;white-space:nowrap}
+.next-epic-cd b{font-family:'Unbounded',sans-serif;color:#fff;font-size:14px}
+.next-epic-approx{font-size:10px;color:var(--text3);font-weight:700}
+@media(max-width:640px){.next-epic{padding:12px 14px;gap:10px}.next-epic-cd{font-size:13px;padding:7px 12px}}
 /* ===== Блок оценок (Metacritic + Steam %) ===== */
 .gc-ratings{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .rt{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;font-size:11px;font-weight:800;border:1px solid var(--border);background:rgba(255,255,255,0.03);line-height:1}
@@ -314,6 +325,7 @@ body.light .theme-toggle{background:rgba(255,255,255,0.8);color:#6d28d9}
       <button class="tool-btn" id="bClr">🗑️ Очистить</button>
     </div>
     <div class="stats" id="fSt"></div>
+    <div id="nextEpicBox"></div>
     <div id="heroBox"></div>
     <div id="fO"></div>
   </div>
@@ -399,6 +411,8 @@ var RATING_TTL=7*24*60*60*1000; // 7 дней — для оценок Steam
    2. СОСТОЯНИЕ
    ============================================================ */
 var sec='free',FG=[],DG=[];
+var nextEpic=null;
+var EPIC_NEXT_TTL=24*60*60*1000; // 24ч — startDate фиксирован после анонса
 var fTab='active',fFl='all',fSo='date';
 var dFl='all',dSo='savings',dMn=50,dMx=100,dPr=60,dPg=0,DPP=30;
 var taken={},theme='dark',dLoaded=false;
@@ -593,43 +607,60 @@ function mapSt(p){p=(p||'').toLowerCase();if(p.indexOf('epic')>=0)return'epic';i
 
 /* ============================================================
    9. ИСТОЧНИК: EPIC GAMES (официальный API)
+   Парсим АКТИВНЫЕ (promotionalOffers) и БУДУЩИЕ (upcomingPromotionalOffers)
    ============================================================ */
 function fetchEpic(){
   return pFetch('https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US').then(function(data){
-    var el;try{el=data.data.Catalog.searchStore.elements}catch(e){return[]}
-    var out=[];
+    var el;try{el=data.data.Catalog.searchStore.elements}catch(e){nextEpic=null;return[]}
+    var out=[],upcoming=[];
     for(var i=0;i<el.length;i++){
       var g=el[i];
       if(!g.promotions)continue;
-      var off=g.promotions.promotionalOffers||[];
-      if(!off.length||!off[0].promotionalOffers||!off[0].promotionalOffers.length)continue;
-      var o=off[0].promotionalOffers[0];
-      var dp=100;try{dp=o.discountSetting.discountPercentage}catch(e){}
-      if(dp!==0)continue;
       var orig=0,disc=-1;try{orig=g.price.totalPrice.originalPrice;disc=g.price.totalPrice.discountPrice}catch(e){}
-      if(orig<=0||disc!==0)continue;
-      var img='',ki=g.keyImages||[];
-      for(var p=0;p<ki.length;p++)if(ki[p].type==='OfferImageWide'||ki[p].type==='DieselStoreFrontWide'||ki[p].type==='Thumbnail'){img=ki[p].url;break}
-      if(!img&&ki.length)img=ki[0].url;
-      var slug=getSlug(g),desc=pickDesc(g.description,g.shortDescription);
-      if(desc)desc=desc.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
-      out.push(nrm({
-        id:'ep-'+g.id,
-        title:g.title||'',
-        desc:desc,
-        img:img,
-        url:slug?'https://store.epicgames.com/ru/p/'+slug:'https://store.epicgames.com/ru/free-games',
-        end:o.endDate,
-        store:'epic',
-        worth:orig/100,
-        hot:true,
-        ts:Date.now(),
-        _rt:'game',
-        _rs:'Active'
-      }))
+
+      // --- АКТИВНАЯ раздача (уже бесплатно) ---
+      var off=g.promotions.promotionalOffers||[];
+      if(off.length&&off[0].promotionalOffers&&off[0].promotionalOffers.length){
+        var o=off[0].promotionalOffers[0];
+        var dp=100;try{dp=o.discountSetting.discountPercentage}catch(e){}
+        if(dp===0&&orig>0&&disc===0){
+          var img='',ki=g.keyImages||[];
+          for(var p=0;p<ki.length;p++)if(ki[p].type==='OfferImageWide'||ki[p].type==='DieselStoreFrontWide'||ki[p].type==='Thumbnail'){img=ki[p].url;break}
+          if(!img&&ki.length)img=ki[0].url;
+          var slug=getSlug(g),desc=pickDesc(g.description,g.shortDescription);
+          if(desc)desc=desc.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+          out.push(nrm({
+            id:'ep-'+g.id,title:g.title||'',desc:desc,img:img,
+            url:slug?'https://store.epicgames.com/ru/p/'+slug:'https://store.epicgames.com/ru/free-games',
+            end:o.endDate,store:'epic',worth:orig/100,hot:true,ts:Date.now(),_rt:'game',_rs:'Active'
+          }));
+        }
+      }
+
+      // --- БУДУЩАЯ раздача (станет бесплатной) ---
+      var up=g.promotions.upcomingPromotionalOffers||[];
+      if(up.length&&up[0].promotionalOffers&&up[0].promotionalOffers.length){
+        var uo=up[0].promotionalOffers[0];
+        var udp=100;try{udp=uo.discountSetting.discountPercentage}catch(e){}
+        if(udp===0&&uo.startDate&&orig>0){
+          upcoming.push({title:g.title||'',start:uo.startDate});
+        }
+      }
     }
+
+    // Ближайшая будущая раздача → её startDate и есть таймер
+    if(upcoming.length){
+      upcoming.sort(function(a,b){return new Date(a.start).getTime()-new Date(b.start).getTime()});
+      var soon=upcoming[0].start;
+      var titles=upcoming.filter(function(u){return u.start===soon}).map(function(u){return u.title});
+      nextEpic={start:soon,titles:titles};
+    }else{
+      nextEpic=null;
+    }
+    cSet('gv_nextepic',nextEpic);
+
     return out.filter(function(g){return g.title&&g.worth>0})
-  }).catch(function(){return[]})
+  }).catch(function(){nextEpic=null;return[]})
 }
 
 /* ============================================================
@@ -1094,6 +1125,64 @@ function renderHero(activeList){
 }
 
 /* ============================================================
+   16.7. ТАЙМЕР ДО СЛЕДУЮЩЕЙ РАЗДАЧИ EPIC (один общий)
+   ============================================================ */
+// Запасной расчёт, если Epic ещё не анонсировал игру: ближайший четверг 16:00 UTC
+function nextEpicThursday(){
+  var now=new Date();
+  var d=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),16,0,0,0));
+  var day=d.getUTCDay();
+  var add=(4-day+7)%7;
+  if(add===0&&now.getTime()>=d.getTime())add=7;
+  d.setUTCDate(d.getUTCDate()+add);
+  return d.getTime();
+}
+function fmtDur(ms){
+  if(ms<0)ms=0;
+  var dy=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);
+  return dy>0?(dy+'д '+h+'ч '+m+'м'):(h+'ч '+m+'м '+s+'с');
+}
+function renderNextEpic(){
+  var box=$('nextEpicBox');if(!box)return;
+  if(sec!=='free'||fTab==='taken'){box.innerHTML='';return}
+  var start,approx=false,titles=[];
+  if(nextEpic&&nextEpic.start){
+    start=new Date(nextEpic.start).getTime();
+    titles=nextEpic.titles||[];
+  }else{
+    start=nextEpicThursday();approx=true;
+  }
+  if(!start||isNaN(start)||start-Date.now()<=0){box.innerHTML='';return}
+  var titleHtml=titles.length
+    ?'<div class="next-epic-title">'+esc(titles.map(cleanDisplayTitle).join(', '))+'</div>'
+    :'<div class="next-epic-title muted">Игра пока не объявлена</div>';
+  box.innerHTML=
+    '<div class="next-epic">'
+      +'<span class="next-epic-ico">🎁</span>'
+      +'<div class="next-epic-main">'
+        +'<span class="next-epic-label">След. бесплатная игра в Epic'+(approx?'<span class="next-epic-approx">≈ ориентировочно</span>':'')+'</span>'
+        +titleHtml
+      +'</div>'
+      +'<div class="next-epic-cd">⏳ <b id="nextEpicCd" data-epic-start="'+start+'">'+fmtDur(start-Date.now())+'</b></div>'
+    +'</div>';
+}
+function tickNextEpic(){
+  var el=$('nextEpicCd');if(!el)return;
+  var start=parseInt(el.getAttribute('data-epic-start'),10);
+  if(!start)return;
+  var d=start-Date.now();
+  if(d<=0){
+    if(!window._epicRefreshing){
+      window._epicRefreshing=true;
+      el.textContent='обновляем…';
+      setTimeout(function(){window._epicRefreshing=false;loadF(true)},2500);
+    }
+    return;
+  }
+  el.textContent=fmtDur(d);
+}
+
+/* ============================================================
    17. РЕНДЕР: ОЦЕНКИ
    ============================================================ */
 function ratingHtml(g){
@@ -1369,6 +1458,8 @@ function loadF(force){
       FG=c.map(nrm);
       showSB('cache','📦 кэш');
       updC();renF();
+      // Таймер Epic из кэша (если есть)
+      var ce=cGet('gv_nextepic',EPIC_NEXT_TTL);if(ce)nextEpic=ce;renderNextEpic();
       // Даже если кэш свежий — догоняем оценки (старый кэш мог быть без них)
       var missing=FG.filter(function(g){return !g.metacritic && !g.posPct});
       if(missing.length){
@@ -1400,6 +1491,8 @@ function loadF(force){
         toast('✅ '+FG.length+' бесплатных игр'+srcInfo,'ok');
         $('upTime').textContent=new Date().toLocaleString('ru-RU');
         updC();renF();
+        // Таймер до следующей раздачи Epic (nextEpic заполнен в fetchEpic)
+        renderNextEpic();
         // 3) Звуковое уведомление при появлении новых ID
         checkNewGames();
         // 4) Фоновое обогащение оценками (CheapShark → Steam fallback)
@@ -1411,6 +1504,8 @@ function loadF(force){
     }else{
       if(!FG.length)showSB('err','❌ API недоступно');
       $('upTime').textContent=new Date().toLocaleString('ru-RU');
+      // Даже если ленты пусты — таймер можно показать (из кэша или фолбэк)
+      renderNextEpic();
       updC();renF()
     }
   })
@@ -1471,9 +1566,10 @@ function switchS(s){
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-nav')===s)});
   $('secF').style.display=s==='free'?'block':'none';
   $('secD').style.display=s==='deals'?'block':'none';
-  if(s==='deals')loadD(false);else showSB('hide')
+  if(s==='deals')loadD(false);else{showSB('hide');renderNextEpic()}
 }
 function updTm(){
+  tickNextEpic();
   document.querySelectorAll('[data-end]').forEach(function(el){
     var c=cdF(el.getAttribute('data-end'));
     if(!c)return;
@@ -1518,7 +1614,7 @@ document.addEventListener('click',function(e){
   }
   var ff=e.target.closest('[data-ff]');if(ff){fFl=ff.getAttribute('data-ff');renF();return}
   var fs=e.target.closest('[data-fs]');if(fs){fSo=fs.getAttribute('data-fs');savePr();renF();return}
-  var ft=e.target.closest('[data-ft]');if(ft){fTab=ft.getAttribute('data-ft');fFl='all';document.querySelectorAll('.stab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ft')===fTab)});renF();return}
+  var ft=e.target.closest('[data-ft]');if(ft){fTab=ft.getAttribute('data-ft');fFl='all';document.querySelectorAll('.stab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ft')===fTab)});renF();renderNextEpic();return}
   var df=e.target.closest('[data-df]');if(df){dFl=df.getAttribute('data-df');dPg=0;dLoaded=false;loadD(true);return}
   var ds=e.target.closest('[data-ds]');if(ds){dSo=ds.getAttribute('data-ds');dPg=0;savePr();dLoaded=false;loadD(true);return}
   var dp=e.target.closest('[data-dp]');if(dp){dPg=parseInt(dp.getAttribute('data-dp'));renD();$('dSt').scrollIntoView({behavior:'smooth',block:'start'});return}
@@ -1615,6 +1711,8 @@ $('rMx').value=dMx;$('rvMx').textContent=dMx+'%';
 $('rPr').value=dPr;$('rvPr').textContent=dPr>=60?'Любая':'$'+dPr;
 $('upTime').textContent=new Date().toLocaleString('ru-RU');
 setCountLoading($('navF'));
+// Таймер Epic из кэша на старте (до первой загрузки)
+(function(){var ce=cGet('gv_nextepic',EPIC_NEXT_TTL);if(ce)nextEpic=ce;renderNextEpic();})();
 loadF();initDealsBadge();
 updTm();setInterval(updTm,1000);
 })();
