@@ -1201,7 +1201,7 @@ function tickNextEpic(){
 
 /* ============================================================
    16.8. ПОДЕЛИТЬСЯ ИГРОЙ + DEEP-LINK (?game=id&t=название)
-   Без сервера: navigator.share() на мобилке, копирование как фолбэк.
+   Без сервера: по клику копируем ссылку в буфер, дальше пользователь сам.
    ============================================================ */
 // Базовый URL сайта без query/hash
 function siteBase(){
@@ -1250,18 +1250,12 @@ function shareGame(id){
   if(!g){toast('Игра не найдена','err');return}
   var url=buildShareUrl(g);
   var text=buildShareText(g);
-  // 1) Нативный шэринг (в основном мобилки) — меню с Telegram/WhatsApp/VK и т.д.
-  if(navigator.share){
-    navigator.share({title:'FreeGamer 🎮',text:text,url:url}).catch(function(){/* пользователь отменил — молчим */});
-    return;
-  }
-  // 2) Фолбэк: копируем "текст + ссылку" в буфер
-  copyToClipboard(text+' '+url).then(function(){
-    toast('🔗 Ссылка скопирована — отправь другу','ok');
+  var payload=text+' '+url;
+  // Просто копируем "текст + ссылку" в буфер. Куда отправить — решает пользователь.
+  copyToClipboard(payload).then(function(){
+    toast('🔗 Ссылка скопирована — вставь её другу куда угодно','ok');
   }).catch(function(){
-    // 3) Если и буфер недоступен — открываем шэринг в Telegram
-    var tg='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);
-    window.open(tg,'_blank','noopener,noreferrer');
+    toast('❌ Не удалось скопировать. Скопируй вручную из адресной строки','err');
   });
 }
 window._S=shareGame;
